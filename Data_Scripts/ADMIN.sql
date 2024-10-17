@@ -441,6 +441,104 @@ UPDATE students SET status = 'Suspended' WHERE student_id = 1;
 
 SELECT * FROM students;
 
+-- Create TRIGGER student_id_increment 
+CREATE OR REPLACE TRIGGER student_id_increment
+BEFORE INSERT ON students
+FOR EACH ROW
+DECLARE
+    max_student_id NUMBER;
+BEGIN
+    SELECT 
+    CASE 
+        WHEN MAX(student_id) IS NULL THEN 0 ELSE MAX(student_id) 
+    END
+    INTO max_student_id FROM students;
+    :NEW.student_id := max_student_id + 1;
+END student_id_increment;
+
+-- Create procedure insert_student 
+CREATE OR REPLACE PROCEDURE insert_student (p_first_name IN VARCHAR2, p_last_name IN VARCHAR2, p_email IN VARCHAR2,
+    p_phone_number IN VARCHAR2, p_date_of_birth IN DATE, p_gender IN VARCHAR2, p_address IN VARCHAR2) AS
+BEGIN
+    INSERT INTO students (first_name, last_name, email, phone_number, date_of_birth, gender, address) 
+    VALUES (p_first_name, p_last_name, p_email, p_phone_number, p_date_of_birth, p_gender, p_address);
+    DBMS_OUTPUT.PUT_LINE('Student successfully added.');
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('An error occurred');
+END;
+
+SET SERVEROUTPUT ON;
+DECLARE
+    v_first_name VARCHAR2(50) := '&first_name';
+    v_last_name VARCHAR2(50) := '&last_name';
+    v_email VARCHAR2(100) := '&email';
+    v_phone_number VARCHAR2(15) := '&phone_number';
+    v_date_of_birth DATE := TO_DATE('&date_of_birth', 'YYYY-MM-DD');
+    v_gender VARCHAR2(15) := '&gender';
+    v_address VARCHAR2(200) := '&address';
+BEGIN
+    insert_student(v_first_name, v_last_name, v_email, v_phone_number, v_date_of_birth, v_gender, v_address);
+END;
+
+-- Create procedure update_student 
+CREATE OR REPLACE PROCEDURE update_student ( p_student_id IN NUMBER, p_first_name IN VARCHAR2, p_last_name IN VARCHAR2, p_email IN VARCHAR2,
+    p_phone_number IN VARCHAR2, p_date_of_birth IN DATE, p_gender IN VARCHAR2, p_address IN VARCHAR2, p_status IN VARCHAR2) AS
+    v_student_count NUMBER;
+BEGIN
+    SELECT COUNT(*) INTO v_student_count FROM students WHERE student_id = p_student_id;
+    IF v_student_count = 0 THEN
+        DBMS_OUTPUT.PUT_LINE('No student found');
+    ELSE
+        UPDATE students SET first_name = p_first_name, last_name = p_last_name, email = p_email, phone_number = p_phone_number,
+            date_of_birth = p_date_of_birth, gender = p_gender, address = p_address, status = p_status
+        WHERE student_id = p_student_id;
+        DBMS_OUTPUT.PUT_LINE('Student updated.');
+    END IF;
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('An error occurred');
+END;
+
+SET SERVEROUTPUT ON;
+DECLARE
+    v_student_id NUMBER := &student_id;
+    v_first_name VARCHAR2(50) := '&first_name';
+    v_last_name VARCHAR2(50) := '&last_name';
+    v_email VARCHAR2(100) := '&email';
+    v_phone_number VARCHAR2(15) := '&phone_number';
+    v_date_of_birth DATE := TO_DATE('&date_of_birth', 'YYYY-MM-DD');
+    v_gender VARCHAR2(15) := '&gender';
+    v_address VARCHAR2(200) := '&address';
+    v_status VARCHAR2(20) := '&status';
+BEGIN
+    update_student(v_student_id, v_first_name, v_last_name, v_email, v_phone_number, v_date_of_birth, v_gender, v_address, v_status);
+END;
+
+-- Create procedure delete_student 
+CREATE OR REPLACE PROCEDURE delete_student ( p_student_id IN NUMBER) AS v_student_count NUMBER;
+BEGIN
+    SELECT COUNT(*) INTO v_student_count FROM students WHERE student_id = p_student_id;
+    IF v_student_count = 0 THEN
+        DBMS_OUTPUT.PUT_LINE('No student found');
+    ELSE
+        DELETE FROM students WHERE student_id = p_student_id;
+        DBMS_OUTPUT.PUT_LINE('Student deleted.');
+    END IF;
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('An error occurred ');
+END;
+
+SET SERVEROUTPUT ON;
+DECLARE
+    v_student_id NUMBER := &student_id;
+BEGIN
+    delete_student(v_student_id);
+END;
+
+
+
 -- Create a table for course_enrollments
 CREATE TABLE course_enrollments (
     course_enrollments_id NUMBER PRIMARY KEY,
@@ -504,6 +602,7 @@ INSERT INTO assignment_students (assignment_students_id, assignment_id, student_
 (2, 1, 2, 'assignment1_student2.docx', 'Graded by Lecturer', 'A', 'Very thorough and well-organized.',SYSTIMESTAMP);
 
 SELECT * FROM assignment_students;
+
 
 -- Create a table for students_feedback
 CREATE TABLE students_feedback (
