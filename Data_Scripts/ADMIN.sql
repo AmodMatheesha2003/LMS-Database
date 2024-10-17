@@ -13,6 +13,50 @@ INSERT INTO departments (department_id, department_name) VALUES (5, 'School of H
 
 SELECT * FROM departments;
 
+-- Create procedure insert_department
+CREATE OR REPLACE PROCEDURE insert_department (i_department_id IN NUMBER, i_department_name IN VARCHAR2) AS
+BEGIN
+    INSERT INTO departments (department_id, department_name) VALUES (i_department_id, i_department_name); 
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('An error occurred');
+END ;
+   
+DECLARE
+    iu_department_id NUMBER := &department_id;
+    iu_department_name VARCHAR2(100) := '&department_name';
+BEGIN
+    insert_department(iu_department_id, iu_department_name);
+    DBMS_OUTPUT.PUT_LINE('Department "' || iu_department_name || '" with ID ' || iu_department_id || ' has been successfully added.');
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error inserting department');
+END; 
+
+-- Create procedure update_department   
+CREATE OR REPLACE PROCEDURE update_department (u_department_id IN NUMBER, u_department_name IN VARCHAR2) AS u_department_count NUMBER;
+BEGIN
+    SELECT COUNT(*) INTO u_department_count FROM departments WHERE department_id = u_department_id;
+    IF u_department_count = 0 THEN
+        DBMS_OUTPUT.PUT_LINE('No department found ');
+    ELSE
+        UPDATE departments SET department_name = u_department_name WHERE department_id = u_department_id;
+        DBMS_OUTPUT.PUT_LINE('Updated');
+    END IF;
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('An error occurred');
+END update_department;
+
+SET SERVEROUTPUT ON;
+DECLARE
+    v_department_id NUMBER := &department_id;
+    v_department_name VARCHAR2(100) := '&department_name';
+    BEGIN
+    update_department(v_department_id, v_department_name);
+END;
+
+
 -- Create a table for lecturers
 CREATE TABLE lecturers (
     lecturer_id NUMBER PRIMARY KEY,
@@ -380,6 +424,7 @@ EXCEPTION
         DBMS_OUTPUT.PUT_LINE('An error occurred: ' || SQLERRM);
 END get_feedback_by_lecturer;
 /
+
 
 
 
