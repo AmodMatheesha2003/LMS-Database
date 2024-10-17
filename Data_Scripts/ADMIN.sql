@@ -19,7 +19,7 @@ BEGIN
     INSERT INTO departments (department_id, department_name) VALUES (i_department_id, i_department_name); 
 EXCEPTION
     WHEN OTHERS THEN
-        DBMS_OUTPUT.PUT_LINE('An error occurred');
+        DBMS_OUTPUT.PUT_LINE('An error occurred '|| SQLERRM);
 END ;
    
 DECLARE
@@ -30,7 +30,7 @@ BEGIN
     DBMS_OUTPUT.PUT_LINE('Department "' || iu_department_name || '" with ID ' || iu_department_id || ' has been successfully added.');
 EXCEPTION
     WHEN OTHERS THEN
-        DBMS_OUTPUT.PUT_LINE('Error inserting department');
+        DBMS_OUTPUT.PUT_LINE('Error inserting department '|| SQLERRM);
 END; 
 
 -- Create procedure update_department   
@@ -45,7 +45,7 @@ BEGIN
     END IF;
 EXCEPTION
     WHEN OTHERS THEN
-        DBMS_OUTPUT.PUT_LINE('An error occurred');
+        DBMS_OUTPUT.PUT_LINE('An error occurred '|| SQLERRM);
 END update_department;
 
 SET SERVEROUTPUT ON;
@@ -54,6 +54,28 @@ DECLARE
     v_department_name VARCHAR2(100) := '&department_name';
     BEGIN
     update_department(v_department_id, v_department_name);
+END;
+
+-- Create procedure delete_department 
+CREATE OR REPLACE PROCEDURE delete_department (d_department_id IN NUMBER) AS u_department_count NUMBER;
+BEGIN
+    SELECT COUNT(*) INTO u_department_count FROM departments WHERE department_id = d_department_id;
+    IF u_department_count = 0 THEN
+        DBMS_OUTPUT.PUT_LINE('No department found');
+    ELSE
+        DELETE FROM departments WHERE department_id = d_department_id;
+        DBMS_OUTPUT.PUT_LINE('Department deleted');
+    END IF;
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('An error occurred '|| SQLERRM);
+END;
+
+SET SERVEROUTPUT ON;
+DECLARE
+    v_department_id NUMBER := &department_id;
+BEGIN
+    delete_department(v_department_id);
 END;
 
 
