@@ -333,6 +333,80 @@ INSERT INTO lessons (lesson_id, course_id, lesson_name, taught_by, created_by) V
 
 SELECT * FROM lessons;
 
+-- Create procedure insert_lesson 
+CREATE OR REPLACE PROCEDURE insert_lesson ( p_lesson_id IN NUMBER, p_course_id IN NUMBER, p_lesson_name IN VARCHAR2,
+    p_taught_by IN NUMBER, p_created_by IN NUMBER) AS 
+BEGIN
+    INSERT INTO lessons (lesson_id, course_id, lesson_name, taught_by, created_by) 
+    VALUES (p_lesson_id, p_course_id, p_lesson_name, p_taught_by, p_created_by);
+    DBMS_OUTPUT.PUT_LINE('Lesson successfully added');
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('An error occurred');
+END;
+
+SET SERVEROUTPUT ON;
+DECLARE
+    v_lesson_id NUMBER := &lesson_id;
+    v_course_id NUMBER := &course_id;
+    v_lesson_name VARCHAR2(100) := '&lesson_name';
+    v_taught_by NUMBER := &taught_by;
+    v_created_by NUMBER := &created_by;
+BEGIN
+    insert_lesson(v_lesson_id, v_course_id, v_lesson_name, v_taught_by, v_created_by);
+END;
+/
+
+-- Create procedure update_lesson 
+CREATE OR REPLACE PROCEDURE update_lesson (p_lesson_id IN NUMBER, p_lesson_name IN VARCHAR2,
+p_status IN VARCHAR2,p_taught_by IN NUMBER) AS v_lesson_count NUMBER;
+BEGIN
+    SELECT COUNT(*) INTO v_lesson_count FROM lessons WHERE lesson_id = p_lesson_id;
+    IF v_lesson_count = 0 THEN
+        DBMS_OUTPUT.PUT_LINE('No lesson found');
+    ELSE
+        UPDATE lessons SET lesson_name = p_lesson_name, status = p_status , taught_by = p_taught_by WHERE lesson_id = p_lesson_id;
+        DBMS_OUTPUT.PUT_LINE('Lesson with ID ' || p_lesson_id || ' has been updated.');
+    END IF;
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('An error occurred');
+END;
+
+SET SERVEROUTPUT ON;
+DECLARE
+    v_lesson_id NUMBER := &lesson_id;
+    v_lesson_name VARCHAR2(100) := '&lesson_name';
+    v_status VARCHAR2(20) := '&status';
+    v_taught_by NUMBER := &taught_by;
+BEGIN
+    update_lesson(v_lesson_id, v_lesson_name, v_status, v_taught_by);
+END;
+/
+
+-- Create procedure delete_lesson
+CREATE OR REPLACE PROCEDURE delete_lesson ( p_lesson_id IN NUMBER) AS v_lesson_count NUMBER;
+BEGIN
+    SELECT COUNT(*) INTO v_lesson_count FROM lessons WHERE lesson_id = p_lesson_id;
+    IF v_lesson_count = 0 THEN
+        DBMS_OUTPUT.PUT_LINE('No lesson found');
+    ELSE
+        DELETE FROM lessons WHERE lesson_id = p_lesson_id;
+        DBMS_OUTPUT.PUT_LINE('Lesson deleted.');
+    END IF;
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('An error occurred');
+END;
+
+SET SERVEROUTPUT ON;
+DECLARE
+    v_lesson_id NUMBER := &lesson_id;
+BEGIN
+    delete_lesson(v_lesson_id);
+END;
+/
+
 -- Create a table for students
 CREATE TABLE students (
     student_id NUMBER PRIMARY KEY,
