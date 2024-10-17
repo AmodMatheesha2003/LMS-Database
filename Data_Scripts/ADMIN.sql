@@ -195,20 +195,20 @@ CREATE TABLE assignment_students (
     assignment_students_id NUMBER PRIMARY KEY,
     assignment_id  NUMBER NOT NULL,
     student_id NUMBER NOT NULL,
-    submit_file VARCHAR2(200) NOT NULL,
-    submissionDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    status VARCHAR2(20) DEFAULT 'Not submitted' CHECK (status IN ('Submitted','Graded by Lecturer')),
+    submit_file VARCHAR2(200),
+    submissionDate TIMESTAMP,
+    status VARCHAR2(20),
     grade VARCHAR2(20),
     Feedback_on_Assessment VARCHAR2(100) ,
     FOREIGN KEY (assignment_id) REFERENCES assignment (assignment_id),
     FOREIGN KEY (student_id) REFERENCES students (student_id)
 );
 
-INSERT INTO assignment_students (assignment_students_id, assignment_id, student_id, submit_file, status) VALUES 
-(1, 1, 1, 'assignment1_student1.docx', 'Submitted');
+INSERT INTO assignment_students (assignment_students_id, assignment_id, student_id, submit_file, status, submissionDate) VALUES 
+(1, 1, 1, 'assignment1_student1.docx', 'Submitted',SYSTIMESTAMP);
 
-INSERT INTO assignment_students (assignment_students_id, assignment_id, student_id, submit_file, status, grade, Feedback_on_Assessment) VALUES
-(2, 1, 2, 'assignment1_student2.docx', 'Graded by Lecturer', 'A', 'Very thorough and well-organized.');
+INSERT INTO assignment_students (assignment_students_id, assignment_id, student_id, submit_file, status, grade, Feedback_on_Assessment, submissionDate) VALUES
+(2, 1, 2, 'assignment1_student2.docx', 'Graded by Lecturer', 'A', 'Very thorough and well-organized.',SYSTIMESTAMP);
 
 SELECT * FROM assignment_students;
 
@@ -226,3 +226,74 @@ CREATE TABLE students_feedback (
 INSERT INTO students_feedback (feedback_id, lesson_id, student_id, comments, rating) VALUES (1, 1, 1, 'The lesson was very informative and engaging.', 5);
 
 SELECT * FROM students_feedback;
+
+CREATE OR REPLACE TRIGGER assignment_idincrement
+BEFORE INSERT ON assignment
+FOR EACH ROW
+DECLARE
+    max_assignment_id NUMBER;
+BEGIN
+    SELECT 
+    CASE 
+        WHEN MAX(assignment_id) IS NULL THEN 0 ELSE MAX(assignment_id) 
+    END
+    INTO max_assignment_id FROM assignment;
+    :NEW.assignment_id := max_assignment_id + 1;
+END;
+/
+DROP TRIGGER assignment_idincrement;
+
+CREATE SEQUENCE assignment_students_seq
+START WITH 1
+INCREMENT BY 1;
+
+CREATE OR REPLACE TRIGGER add_students_to_assignment
+AFTER INSERT ON assignment
+FOR EACH ROW
+DECLARE
+    CURSOR student_cursor IS
+        SELECT ce.student_id
+        FROM course_enrollments ce
+        JOIN lessons l ON l.course_id = ce.course_id
+        WHERE l.lesson_id = :NEW.lesson_id;
+BEGIN
+    FOR student_record IN student_cursor LOOP
+        INSERT INTO assignment_students (assignment_students_id, assignment_id, student_id, status)
+        VALUES (assignment_students_seq.NEXTVAL, :NEW.assignment_id, student_record.student_id, 'Not submitted');
+    END LOOP;
+END;
+/
+
+
+
+
+
+INSERT INTO assignment (assignment_title, assignment_fiies, lesson_id, end_date) VALUES ('Assignment 8', 'file8.pdf', 1, TO_DATE('2024-10-25', 'YYYY-MM-DD'));
+
+SELECT * FROM ADMIN.assignment_students;
+SELECT * FROM ADMIN.assignment;
+SELECT * FROM ADMIN.course_enrollments;
+
+DELETE FROM assignment WHERE assignment_id = 8;
+DELETE FROM assignment_students WHERE assignment_id = 8;
+
+UPDATE ADMIN.assignment_students SET 
+    submit_file = 'assignment1_student7.docx',
+    status = 'Submitted',
+    submissionDate = SYSTIMESTAMP
+WHERE assignment_id = 7 AND assignment_students_id = 1;
+
+
+CREATE OR REPLACE PROCEDURE submit_assignment_student (p_assignment_id IN NUMBER,p_assignment_students_id IN NUMBER,p_submit_file IN VARCHAR2) AS
+BEGIN
+    UPDATE ADMIN.assignment_students
+    SET submit_file = p_submit_file, status = 'Submitted', submissionDate = SYSTIMESTAMP
+    WHERE assignment_id = p_assignment_id AND assignment_students_id = p_assignment_students_id;
+    DBMS_OUTPUT.PUT_LINE('Record updated successfully.');
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('No record found');
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
+END;
+/
