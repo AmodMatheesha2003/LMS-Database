@@ -185,7 +185,6 @@ END;
 /
 
 
-
 -- Create a table for courses
 CREATE TABLE courses (
     course_id NUMBER PRIMARY KEY,
@@ -208,17 +207,95 @@ INSERT INTO courses (course_id, course_name, department_id, description, credits
 INSERT INTO courses (course_id, course_name, department_id, description, credits, start_date, end_date, created_by) VALUES 
 (2, 'Higher National Diploma in Software Engineering ', 1, 'This program introduces students to the advances of programming', 45, TO_DATE('2024-05-10', 'YYYY-MM-DD'), TO_DATE('2025-05-15', 'YYYY-MM-DD'), 3);
 INSERT INTO courses (course_id, course_name, department_id, description, credits, start_date, end_date, created_by) VALUES 
-(3, 'Advanced Diploma in Business Management', 1, 'This program introduces students to the fundamentals of Business', 30, TO_DATE('2024-01-10', 'YYYY-MM-DD'), TO_DATE('2025-01-15', 'YYYY-MM-DD'), 3);
+(3, 'Advanced Diploma in Business Management', 2, 'This program introduces students to the fundamentals of Business', 30, TO_DATE('2024-01-10', 'YYYY-MM-DD'), TO_DATE('2025-01-15', 'YYYY-MM-DD'), 3);
 INSERT INTO courses (course_id, course_name, department_id, description, credits, start_date, end_date, created_by) VALUES 
-(4, 'Higher National Diploma in Business Management', 1, 'This program introduces students to the advances of Business', 35, TO_DATE('2024-05-10', 'YYYY-MM-DD'), TO_DATE('2025-05-15', 'YYYY-MM-DD'), 3);
+(4, 'Higher National Diploma in Business Management', 2, 'This program introduces students to the advances of Business', 35, TO_DATE('2024-05-10', 'YYYY-MM-DD'), TO_DATE('2025-05-15', 'YYYY-MM-DD'), 3);
 INSERT INTO courses (course_id, course_name, department_id, description, credits, start_date, end_date, created_by) VALUES 
-(5, 'Diploma in English', 1, 'This program introduces students to the English', 20, TO_DATE('2024-05-10', 'YYYY-MM-DD'), TO_DATE('2025-11-15', 'YYYY-MM-DD'), 3);
+(5, 'Diploma in English', 4, 'This program introduces students to the English', 20, TO_DATE('2024-05-10', 'YYYY-MM-DD'), TO_DATE('2025-11-15', 'YYYY-MM-DD'), 3);
 INSERT INTO courses (course_id, course_name, department_id, description, credits, start_date, end_date, created_by) VALUES 
 (6, 'Higher National Diploma in Network Engineering', 1, 'This program introduces students to the fundamentals of Network', 40, TO_DATE('2024-08-10', 'YYYY-MM-DD'), TO_DATE('2025-08-15', 'YYYY-MM-DD'), 3);
 
 UPDATE courses SET status = 'Inactive' WHERE course_id = 1;
 
 SELECT * FROM courses;
+
+-- Create procedure insert_course 
+CREATE OR REPLACE PROCEDURE insert_course (p_course_id IN NUMBER, p_course_name IN VARCHAR2, p_department_id IN NUMBER, p_description IN VARCHAR2, p_credits IN NUMBER,
+    p_start_date IN DATE, p_end_date IN DATE, p_created_by IN NUMBER) AS 
+BEGIN
+    INSERT INTO courses (course_id, course_name, department_id, description, credits, start_date, end_date, created_by) 
+    VALUES (p_course_id, p_course_name, p_department_id, p_description, p_credits, p_start_date, p_end_date, p_created_by);
+    DBMS_OUTPUT.PUT_LINE('Course successfully added');
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('An error occurred');
+END;
+
+SET SERVEROUTPUT ON;
+DECLARE
+    v_course_id NUMBER := &course_id;
+    v_course_name VARCHAR2(100) := '&course_name';
+    v_department_id NUMBER := &department_id;
+    v_description VARCHAR2(200) := '&description';
+    v_credits NUMBER := &credits;
+    v_start_date DATE := TO_DATE('&start_date', 'YYYY-MM-DD');
+    v_end_date DATE := TO_DATE('&end_date', 'YYYY-MM-DD');
+    v_created_by NUMBER := &created_by;
+BEGIN
+    insert_course(v_course_id, v_course_name, v_department_id, v_description, v_credits, v_start_date, v_end_date, v_created_by);
+END;
+
+-- Create procedure update_course 
+CREATE OR REPLACE PROCEDURE update_course (p_course_id IN NUMBER, p_course_name IN VARCHAR2, p_department_id IN NUMBER, p_description IN VARCHAR2,
+    p_credits IN NUMBER,p_start_date IN DATE, p_end_date IN DATE, p_status IN VARCHAR2) AS 
+BEGIN
+    UPDATE courses SET course_name = p_course_name, department_id = p_department_id, description = p_description, credits = p_credits,
+    start_date = p_start_date, end_date = p_end_date,status = p_status WHERE course_id = p_course_id;
+    IF SQL%ROWCOUNT = 0 THEN
+        DBMS_OUTPUT.PUT_LINE('No course found');
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('Course successfully updated');
+    END IF;
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('An error occurred');
+END;
+
+SET SERVEROUTPUT ON;
+DECLARE
+    v_course_id NUMBER := &course_id;
+    v_course_name VARCHAR2(100) := '&course_name'; 
+    v_department_id NUMBER := &department_id;
+    v_description VARCHAR2(200) := '&description'; 
+    v_credits NUMBER := &credits;
+    v_start_date DATE := TO_DATE('&start_date', 'YYYY-MM-DD'); 
+    v_end_date DATE := TO_DATE('&end_date', 'YYYY-MM-DD'); 
+    v_status VARCHAR2(20) := '&status'; 
+BEGIN
+    update_course(v_course_id, v_course_name, v_department_id, v_description, v_credits, v_start_date, v_end_date, v_status);
+END;
+
+-- Create procedure delete_course 
+CREATE OR REPLACE PROCEDURE delete_course (p_course_id IN NUMBER) AS 
+BEGIN
+    DELETE FROM courses WHERE course_id = p_course_id;
+    IF SQL%ROWCOUNT = 0 THEN
+        DBMS_OUTPUT.PUT_LINE('No course found');
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('Course successfully deleted');
+    END IF;
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('An error occurred');
+END;
+
+SET SERVEROUTPUT ON;
+DECLARE
+    v_course_id NUMBER := &course_id;
+BEGIN
+    delete_course(v_course_id);
+END;
+
 
 -- Create a table for lessons
 CREATE TABLE lessons (
@@ -408,9 +485,6 @@ END;
 /
 
 
-
-
-
 INSERT INTO assignment (assignment_title, assignment_fiies, lesson_id, end_date) VALUES ('Assignment 8', 'file8.pdf', 1, TO_DATE('2024-10-25', 'YYYY-MM-DD'));
 
 SELECT * FROM ADMIN.assignment_students;
@@ -475,7 +549,6 @@ BEGIN
         WHEN MAX(feedback_id) IS NULL THEN 0 ELSE MAX(feedback_id)
     END
     INTO max_feedback_id FROM students_feedback;
-    
     :NEW.feedback_id := max_feedback_id + 1;
 END;
 /
@@ -496,12 +569,7 @@ EXCEPTION
 END;
 /
 
-SELECT * FROM ADMIN.course_enrollments;
-SELECT * FROM ADMIN.students_feedback;
-SELECT * FROM ADMIN.LESSONS;
 
-SELECT l.lesson_name, sf.comments, sf.rating, sf.post_date FROM ADMIN.students_feedback sf JOIN lessons l ON sf.lesson_id = l.lesson_id
-WHERE l.lesson_id IN (SELECT lesson_id FROM ADMIN.LESSONS WHERE taught_by = 1);
 
 CREATE OR REPLACE PROCEDURE get_feedback_by_lecturer (p_lecturer_id IN NUMBER) AS feedback_found BOOLEAN := FALSE;
 BEGIN
