@@ -31,6 +31,12 @@ GRANT UPDATE (submit_file, status, submissionDate) ON ADMIN.assignment_students 
 GRANT EXECUTE ON ADMIN.submit_assignment_student TO STUDENT;
 
 
+GRANT EXECUTE ON ADMIN.insert_assignment TO LECTURER;
+GRANT EXECUTE ON ADMIN.grade_assignment_student TO LECTURER;
+GRANT EXECUTE ON ADMIN.get_feedback_by_lecturer TO LECTURER;
+
+GRANT EXECUTE ON ADMIN.insert_student_feedback TO STUDENT;
+
 
 
 

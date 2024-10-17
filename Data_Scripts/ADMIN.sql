@@ -219,6 +219,7 @@ CREATE TABLE students_feedback (
     student_id NUMBER NOT NULL,
     comments VARCHAR2(100) NOT NULL,
     rating NUMBER NOT NULL CHECK (rating BETWEEN 1 AND 5),
+    post_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (lesson_id) REFERENCES lessons (lesson_id),
     FOREIGN KEY (student_id) REFERENCES students (student_id)
 );
@@ -241,7 +242,7 @@ BEGIN
     :NEW.assignment_id := max_assignment_id + 1;
 END;
 /
-DROP TRIGGER assignment_idincrement;
+
 
 CREATE SEQUENCE assignment_students_seq
 START WITH 1
@@ -297,3 +298,88 @@ EXCEPTION
         DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
 END;
 /
+
+CREATE OR REPLACE PROCEDURE insert_assignment (p_assignment_title IN VARCHAR2, p_assignment_fiies IN VARCHAR2, p_lesson_id IN NUMBER, p_end_date IN DATE) AS
+BEGIN
+    INSERT INTO ADMIN.assignment (assignment_title,assignment_fiies,lesson_id,end_date) VALUES (p_assignment_title, p_assignment_fiies, p_lesson_id, p_end_date);
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error occurred while inserting assignment Check and try agin');
+END;
+/
+
+CREATE OR REPLACE PROCEDURE grade_assignment_student (p_assignment_id IN NUMBER,p_assignment_students_id IN NUMBER,p_grade IN VARCHAR2,p_feedback IN VARCHAR2) AS
+BEGIN
+    UPDATE ADMIN.assignment_students SET status = 'Graded', grade = p_grade, Feedback_on_Assessment = p_feedback
+    WHERE assignment_id = p_assignment_id AND assignment_students_id = p_assignment_students_id;
+    DBMS_OUTPUT.PUT_LINE('Assignment student record graded successfully.');
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('No record found');
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error occurred');
+END;
+/
+
+
+CREATE OR REPLACE TRIGGER feedback_id_increment
+BEFORE INSERT ON students_feedback
+FOR EACH ROW
+DECLARE
+    max_feedback_id NUMBER;
+BEGIN
+    SELECT 
+    CASE 
+        WHEN MAX(feedback_id) IS NULL THEN 0 ELSE MAX(feedback_id)
+    END
+    INTO max_feedback_id FROM students_feedback;
+    
+    :NEW.feedback_id := max_feedback_id + 1;
+END;
+/
+
+CREATE OR REPLACE PROCEDURE insert_student_feedback (p_course_id IN NUMBER,p_student_id IN NUMBER,p_comments IN VARCHAR2,p_rating IN NUMBER) AS
+    v_count NUMBER;
+BEGIN
+    SELECT COUNT(*) INTO v_count FROM course_enrollments WHERE student_id = p_student_id AND course_id = p_course_id;
+    IF v_count > 0 THEN
+        INSERT INTO students_feedback (lesson_id, student_id, comments, rating, post_date) VALUES (p_course_id, p_student_id, p_comments, p_rating, SYSTIMESTAMP);
+        DBMS_OUTPUT.PUT_LINE('Feedback inserted successfully.');
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('The student is not related to the specified lesson');
+    END IF;
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error occurred: ' || SQLERRM);
+END;
+/
+
+SELECT * FROM ADMIN.course_enrollments;
+SELECT * FROM ADMIN.students_feedback;
+SELECT * FROM ADMIN.LESSONS;
+
+SELECT l.lesson_name, sf.comments, sf.rating, sf.post_date FROM ADMIN.students_feedback sf JOIN lessons l ON sf.lesson_id = l.lesson_id
+WHERE l.lesson_id IN (SELECT lesson_id FROM ADMIN.LESSONS WHERE taught_by = 1);
+
+CREATE OR REPLACE PROCEDURE get_feedback_by_lecturer (p_lecturer_id IN NUMBER) AS feedback_found BOOLEAN := FALSE;
+BEGIN
+    FOR rec IN (SELECT l.lesson_name, sf.comments, sf.rating, sf.post_date FROM ADMIN.students_feedback sf JOIN lessons l ON sf.lesson_id = l.lesson_id
+                WHERE l.lesson_id IN (SELECT lesson_id FROM ADMIN.lessons WHERE taught_by = p_lecturer_id)) LOOP
+            DBMS_OUTPUT.PUT_LINE('Lesson: ' || rec.lesson_name );
+            DBMS_OUTPUT.PUT_LINE('Comment: ' || rec.comments );
+            DBMS_OUTPUT.PUT_LINE('Rating: ' || rec.rating );
+            DBMS_OUTPUT.PUT_LINE('Date: ' || rec.post_date );
+            DBMS_OUTPUT.PUT_LINE(' ');
+            feedback_found := TRUE;
+    END LOOP;
+    IF NOT feedback_found THEN
+        DBMS_OUTPUT.PUT_LINE('No feedback found');
+    END IF;
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('An error occurred: ' || SQLERRM);
+END get_feedback_by_lecturer;
+/
+
+
+

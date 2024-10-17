@@ -30,3 +30,30 @@ EXCEPTION
 END;
 /
 
+--SELECT * FROM ADMIN.assignment_students WHERE student_id = 1 AND status = ' ';
+
+
+
+SET SERVEROUTPUT ON;
+DECLARE
+    v_course_id NUMBER;
+    v_student_id NUMBER;
+    v_comments VARCHAR2(255);
+    v_rating NUMBER;
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('Enter Course ID:');
+    v_course_id := &course_id;
+    DBMS_OUTPUT.PUT_LINE('Enter Student ID:');
+    v_student_id := &student_id;
+    DBMS_OUTPUT.PUT_LINE('Enter Comments:');
+    v_comments := '&comments';   
+    DBMS_OUTPUT.PUT_LINE('Enter Rating (1-5):');
+    v_rating := &rating;
+    ADMIN.insert_student_feedback(v_course_id, v_student_id, v_comments, v_rating);
+    DBMS_OUTPUT.PUT_LINE('Feedback operation completed.');
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('An error occurred: ' || SQLERRM);
+END;
+/
+
