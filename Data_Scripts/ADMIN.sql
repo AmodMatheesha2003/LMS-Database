@@ -110,6 +110,82 @@ SELECT * FROM lecturers;
 
 UPDATE lecturers SET status = 'Retired' WHERE lecturer_id = 6;
 
+-- Create procedure insert_lecturer 
+CREATE OR REPLACE PROCEDURE insert_lecturer (p_lecturer_id IN NUMBER, p_first_name IN VARCHAR2, p_last_name IN VARCHAR2, p_email IN VARCHAR2,
+    p_phone_number IN VARCHAR2, p_department_id IN NUMBER,p_hire_date IN DATE,p_salary IN NUMBER) AS 
+BEGIN
+    INSERT INTO lecturers (lecturer_id, first_name, last_name, email, phone_number, department_id, hire_date, salary) 
+    VALUES (p_lecturer_id, p_first_name, p_last_name, p_email, p_phone_number, p_department_id, p_hire_date, p_salary);
+    DBMS_OUTPUT.PUT_LINE('Successfully added');
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('An error occurred');
+END;
+
+SET SERVEROUTPUT ON;
+DECLARE
+    v_lecturer_id NUMBER := &lecturer_id;
+    v_first_name VARCHAR2(50) := '&first_name';
+    v_last_name VARCHAR2(50) := '&last_name';
+    v_email VARCHAR2(100) := '&email';
+    v_phone_number VARCHAR2(15) := '&phone_number';
+    v_department_id NUMBER := &department_id;
+    v_hire_date DATE := TO_DATE('&hire_date', 'YYYY-MM-DD');
+    v_salary NUMBER := &salary;
+BEGIN
+    insert_lecturer(v_lecturer_id, v_first_name, v_last_name, v_email, v_phone_number, v_department_id, v_hire_date, v_salary);
+END;
+/
+
+-- Create procedure update_lecturer_status 
+CREATE OR REPLACE PROCEDURE update_lecturer_status (p_lecturer_id IN NUMBER, p_status IN VARCHAR2) AS v_lecturer_count NUMBER;
+BEGIN
+    SELECT COUNT(*) INTO v_lecturer_count FROM lecturers WHERE lecturer_id = p_lecturer_id;
+    IF v_lecturer_count = 0 THEN
+        DBMS_OUTPUT.PUT_LINE('No lecturer found');
+    ELSE
+        UPDATE lecturers SET status = p_status WHERE lecturer_id = p_lecturer_id;
+        DBMS_OUTPUT.PUT_LINE('Lecturer status updated ');
+    END IF;
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('An error occurred');
+END;
+
+SET SERVEROUTPUT ON;
+DECLARE
+    v_lecturer_id NUMBER := &lecturer_id;
+    v_status VARCHAR2(20) := '&status';
+BEGIN
+    update_lecturer_status(v_lecturer_id, v_status);
+END;
+/
+
+-- Create procedure delete_lecturer 
+CREATE OR REPLACE PROCEDURE delete_lecturer (p_lecturer_id IN NUMBER) AS v_lecturer_count NUMBER;
+BEGIN
+    SELECT COUNT(*) INTO v_lecturer_count FROM lecturers WHERE lecturer_id = p_lecturer_id;
+    IF v_lecturer_count = 0 THEN
+        DBMS_OUTPUT.PUT_LINE('No lecturer found');
+    ELSE
+        DELETE FROM lecturers WHERE lecturer_id = p_lecturer_id;
+        DBMS_OUTPUT.PUT_LINE('Lecturer deleted');
+    END IF;
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('An error occurred');
+END;
+
+SET SERVEROUTPUT ON;
+DECLARE
+    v_lecturer_id NUMBER := &lecturer_id;
+BEGIN
+    delete_lecturer(v_lecturer_id);
+END;
+/
+
+
+
 -- Create a table for courses
 CREATE TABLE courses (
     course_id NUMBER PRIMARY KEY,
