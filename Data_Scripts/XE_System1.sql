@@ -25,16 +25,13 @@ GRANT USER_ROLE TO LECTURER;
 GRANT INSERT,DELETE,UPDATE ON ADMIN.assignment TO LECTURER;
 GRANT DELETE,UPDATE ON ADMIN.assignment_students TO LECTURER;
 GRANT CREATE PROCEDURE TO LECTURER;
-
-
-GRANT UPDATE (submit_file, status, submissionDate) ON ADMIN.assignment_students TO STUDENT;
-GRANT EXECUTE ON ADMIN.submit_assignment_student TO STUDENT;
-
-
 GRANT EXECUTE ON ADMIN.insert_assignment TO LECTURER;
 GRANT EXECUTE ON ADMIN.grade_assignment_student TO LECTURER;
 GRANT EXECUTE ON ADMIN.get_feedback_by_lecturer TO LECTURER;
 
+
+GRANT UPDATE (submit_file, status, submissionDate) ON ADMIN.assignment_students TO STUDENT;
+GRANT EXECUTE ON ADMIN.submit_assignment_student TO STUDENT;
 GRANT EXECUTE ON ADMIN.insert_student_feedback TO STUDENT;
 
 

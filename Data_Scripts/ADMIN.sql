@@ -701,6 +701,7 @@ INSERT INTO students_feedback (feedback_id, lesson_id, student_id, comments, rat
 
 SELECT * FROM students_feedback;
 
+-- Create a TRIGGER for assignment_idincrement
 CREATE OR REPLACE TRIGGER assignment_idincrement
 BEFORE INSERT ON assignment
 FOR EACH ROW
@@ -716,19 +717,18 @@ BEGIN
 END;
 /
 
-
+-- Create a SEQUENCE assignment_students_seq
 CREATE SEQUENCE assignment_students_seq
 START WITH 1
 INCREMENT BY 1;
 
+-- Create a TRIGGER for add_students_to_assignment
 CREATE OR REPLACE TRIGGER add_students_to_assignment
 AFTER INSERT ON assignment
 FOR EACH ROW
 DECLARE
     CURSOR student_cursor IS
-        SELECT ce.student_id
-        FROM course_enrollments ce
-        JOIN lessons l ON l.course_id = ce.course_id
+        SELECT ce.student_id FROM course_enrollments ce JOIN lessons l ON l.course_id = ce.course_id 
         WHERE l.lesson_id = :NEW.lesson_id;
 BEGIN
     FOR student_record IN student_cursor LOOP
@@ -738,46 +738,31 @@ BEGIN
 END;
 /
 
-
-INSERT INTO assignment (assignment_title, assignment_fiies, lesson_id, end_date) VALUES ('Assignment 8', 'file8.pdf', 1, TO_DATE('2024-10-25', 'YYYY-MM-DD'));
-
-SELECT * FROM ADMIN.assignment_students;
-SELECT * FROM ADMIN.assignment;
-SELECT * FROM ADMIN.course_enrollments;
-
-DELETE FROM assignment WHERE assignment_id = 8;
-DELETE FROM assignment_students WHERE assignment_id = 8;
-
-UPDATE ADMIN.assignment_students SET 
-    submit_file = 'assignment1_student7.docx',
-    status = 'Submitted',
-    submissionDate = SYSTIMESTAMP
-WHERE assignment_id = 7 AND assignment_students_id = 1;
-
-
+-- Create a PROCEDURE for submit_assignment_student
 CREATE OR REPLACE PROCEDURE submit_assignment_student (p_assignment_id IN NUMBER,p_assignment_students_id IN NUMBER,p_submit_file IN VARCHAR2) AS
 BEGIN
-    UPDATE ADMIN.assignment_students
-    SET submit_file = p_submit_file, status = 'Submitted', submissionDate = SYSTIMESTAMP
+    UPDATE ADMIN.assignment_students SET submit_file = p_submit_file, status = 'Submitted', submissionDate = SYSTIMESTAMP
     WHERE assignment_id = p_assignment_id AND assignment_students_id = p_assignment_students_id;
-    DBMS_OUTPUT.PUT_LINE('Record updated successfully.');
+    DBMS_OUTPUT.PUT_LINE('Record updated successfully');
 EXCEPTION
     WHEN NO_DATA_FOUND THEN
         DBMS_OUTPUT.PUT_LINE('No record found');
     WHEN OTHERS THEN
-        DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
+        DBMS_OUTPUT.PUT_LINE('Error');
 END;
 /
 
+-- Create a PROCEDURE for insert_assignment
 CREATE OR REPLACE PROCEDURE insert_assignment (p_assignment_title IN VARCHAR2, p_assignment_fiies IN VARCHAR2, p_lesson_id IN NUMBER, p_end_date IN DATE) AS
 BEGIN
     INSERT INTO ADMIN.assignment (assignment_title,assignment_fiies,lesson_id,end_date) VALUES (p_assignment_title, p_assignment_fiies, p_lesson_id, p_end_date);
 EXCEPTION
     WHEN OTHERS THEN
-        DBMS_OUTPUT.PUT_LINE('Error occurred while inserting assignment Check and try agin');
+        DBMS_OUTPUT.PUT_LINE('Error occurred try agin');
 END;
 /
 
+-- Create a PROCEDURE for grade_assignment_student
 CREATE OR REPLACE PROCEDURE grade_assignment_student (p_assignment_id IN NUMBER,p_assignment_students_id IN NUMBER,p_grade IN VARCHAR2,p_feedback IN VARCHAR2) AS
 BEGIN
     UPDATE ADMIN.assignment_students SET status = 'Graded', grade = p_grade, Feedback_on_Assessment = p_feedback
@@ -791,7 +776,7 @@ EXCEPTION
 END;
 /
 
-
+-- Create a TRIGGER for feedback_id_increment
 CREATE OR REPLACE TRIGGER feedback_id_increment
 BEFORE INSERT ON students_feedback
 FOR EACH ROW
@@ -807,6 +792,7 @@ BEGIN
 END;
 /
 
+-- Create a PROCEDURE for insert_student_feedback
 CREATE OR REPLACE PROCEDURE insert_student_feedback (p_course_id IN NUMBER,p_student_id IN NUMBER,p_comments IN VARCHAR2,p_rating IN NUMBER) AS
     v_count NUMBER;
 BEGIN
@@ -819,12 +805,11 @@ BEGIN
     END IF;
 EXCEPTION
     WHEN OTHERS THEN
-        DBMS_OUTPUT.PUT_LINE('Error occurred: ' || SQLERRM);
+        DBMS_OUTPUT.PUT_LINE('Error occurred');
 END;
 /
 
-
-
+-- Create a PROCEDURE for get_feedback_by_lecturer
 CREATE OR REPLACE PROCEDURE get_feedback_by_lecturer (p_lecturer_id IN NUMBER) AS feedback_found BOOLEAN := FALSE;
 BEGIN
     FOR rec IN (SELECT l.lesson_name, sf.comments, sf.rating, sf.post_date FROM ADMIN.students_feedback sf JOIN lessons l ON sf.lesson_id = l.lesson_id
@@ -841,10 +826,6 @@ BEGIN
     END IF;
 EXCEPTION
     WHEN OTHERS THEN
-        DBMS_OUTPUT.PUT_LINE('An error occurred: ' || SQLERRM);
+        DBMS_OUTPUT.PUT_LINE('An error occurred');
 END get_feedback_by_lecturer;
 /
-
-
-
-

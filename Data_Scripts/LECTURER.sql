@@ -1,21 +1,12 @@
-INSERT INTO ADMIN.assignment (assignment_title, assignment_fiies, lesson_id, end_date) VALUES ('Assignment 8', 'file8.pdf', 1, TO_DATE('2024-10-28', 'YYYY-MM-DD'));
-
 SELECT * FROM ADMIN.assignment;
-
-DELETE FROM ADMIN.assignment WHERE assignment_id = 8;
-DELETE FROM ADMIN.assignment_students WHERE assignment_id = 8;
-
-UPDATE ADMIN.assignment SET assignment_fiies = 'file6.pdf',end_date = TO_DATE('2024-10-19', 'YYYY-MM-DD') WHERE assignment_title = 'Assignment 6';
-
+SELECT * FROM ADMIN.assignment WHERE assignment_id = 1;
 SELECT * FROM ADMIN.assignment_students;
+SELECT * FROM ADMIN.assignment_students WHERE assignment_students_id = 1;
+SELECT * FROM ADMIN.assignment_students WHERE status = 'Submitted';
+SELECT * FROM ADMIN.assignment_students WHERE status = 'Not submitted';
+SELECT * FROM ADMIN.assignment_students WHERE status = 'Not submitted' AND assignment_id = 9;
 
-UPDATE ADMIN.assignment_students SET
-    status = 'Graded',
-    grade = 'A',
-    Feedback_on_Assessment = 'Excellent work!' 
-WHERE assignment_id = 1 AND assignment_students_id = 1;
-
-
+--Insert assignment
 SET SERVEROUTPUT ON;
 DECLARE
     v_assignment_title VARCHAR2(255);
@@ -39,12 +30,7 @@ EXCEPTION
 END;
 /
 
-SELECT * FROM ADMIN.assignment_students WHERE status = 'Submitted';
-SELECT * FROM ADMIN.assignment_students WHERE status = 'Not submitted';
-SELECT * FROM ADMIN.assignment_students WHERE status = 'Not submitted' AND assignment_id = 9;
-SELECT * FROM ADMIN.assignment_students;
-
-
+--Update assignment
 SET SERVEROUTPUT ON;
 DECLARE
     v_assignment_id NUMBER;
@@ -68,6 +54,7 @@ EXCEPTION
 END;
 /
 
+--get feedback by lecturer
 SET SERVEROUTPUT ON;
 DECLARE
     v_lecturer_id NUMBER;

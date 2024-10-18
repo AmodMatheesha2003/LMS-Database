@@ -3,13 +3,7 @@ SELECT * FROM ADMIN.assignment_students WHERE student_id = 1;
 
 SELECT * FROM ADMIN.assignment_students WHERE student_id = 1 AND assignment_id = 1;
 
-UPDATE ADMIN.assignment_students SET 
-    submit_file = 'test.docx',
-    status = 'Submitted',
-    submissionDate = SYSTIMESTAMP
-WHERE assignment_id = 1 AND assignment_students_id = 1;
-
-
+-- Submit assignment
 SET SERVEROUTPUT ON;
 DECLARE
     v_assignment_id NUMBER;
@@ -30,10 +24,7 @@ EXCEPTION
 END;
 /
 
---SELECT * FROM ADMIN.assignment_students WHERE student_id = 1 AND status = ' ';
-
-
-
+--insert student feedback
 SET SERVEROUTPUT ON;
 DECLARE
     v_course_id NUMBER;
