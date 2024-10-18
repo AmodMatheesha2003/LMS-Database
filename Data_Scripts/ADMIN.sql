@@ -829,3 +829,76 @@ EXCEPTION
         DBMS_OUTPUT.PUT_LINE('An error occurred');
 END get_feedback_by_lecturer;
 /
+
+--Number of Courses Offered by Each Department
+SELECT d.department_name, COUNT(c.course_id) AS number_of_courses FROM departments d LEFT JOIN courses c ON d.department_id = c.department_id
+GROUP BY d.department_name ORDER BY number_of_courses DESC;
+
+--Number of lessons and courses Offered by Each Department
+SELECT d.department_id, d.department_name, COUNT(DISTINCT c.course_id) AS total_courses, COUNT(l.lesson_id) AS total_lessons
+FROM departments d LEFT JOIN courses c ON d.department_id = c.department_id
+LEFT JOIN lessons l ON c.course_id = l.course_id
+GROUP BY d.department_id, d.department_name ORDER BY d.department_name;
+
+--Lecturers Who Have Taught More Than 3 Lessons
+SELECT l.lecturer_id, l.first_name, l.last_name, COUNT(ls.lesson_id) AS lessons_taught
+FROM lecturers l INNER JOIN lessons ls ON l.lecturer_id = ls.taught_by
+GROUP BY l.lecturer_id, l.first_name, l.last_name
+HAVING COUNT(ls.lesson_id) > 3
+ORDER BY lessons_taught DESC;
+
+--All Students Enrolled in Diploma in Software Engineering
+SELECT s.student_id, s.first_name, s.last_name, s.email
+FROM students s INNER JOIN course_enrollments ce ON s.student_id = ce.student_id
+INNER JOIN courses c ON ce.course_id = c.course_id
+WHERE c.course_name = 'Diploma in Software Engineering ';
+
+--All Assignments Due in Next 7 Days
+SELECT a.assignment_title, a.end_date, c.course_name, l.lesson_name
+FROM assignment a INNER JOIN lessons l ON a.lesson_id = l.lesson_id
+INNER JOIN courses c ON l.course_id = c.course_id
+WHERE a.end_date BETWEEN SYSDATE AND SYSDATE + 7
+ORDER BY a.end_date;
+
+--Average Salary of Lecturers in Each Department
+SELECT d.department_name, AVG(l.salary) AS average_salary
+FROM departments d INNER JOIN lecturers l ON d.department_id = l.department_id
+GROUP BY d.department_name;
+
+--Number of enrollments
+SELECT c.course_name, COUNT(ce.student_id) AS number_of_enrollments
+FROM courses c INNER JOIN course_enrollments ce ON c.course_id = ce.course_id
+GROUP BY c.course_name ORDER BY number_of_enrollments DESC;
+
+--Active  Lecturers with Active Courses
+SELECT l.lecturer_id, l.first_name, l.last_name, c.course_name, c.status FROM lecturers l
+INNER JOIN courses c ON l.lecturer_id = c.created_by
+WHERE l.status = 'Active' AND c.status = 'Active';
+
+--Courses Without any enrollments
+SELECT c.* FROM courses c
+LEFT JOIN course_enrollments ce ON c.course_id = ce.course_id
+WHERE ce.course_id IS NULL;
+
+--Total number of lessons per course
+SELECT c.course_name, COUNT(l.lesson_id) AS total_lessons
+FROM courses c LEFT JOIN lessons l ON c.course_id = l.course_id
+GROUP BY c.course_name ORDER BY total_lessons DESC;
+
+-- Students Who have enrolled in more than 2 courses
+SELECT s.student_id, s.first_name, s.last_name, COUNT(ce.course_id) AS courses_enrolled FROM students s
+INNER JOIN course_enrollments ce ON s.student_id = ce.student_id
+GROUP BY s.student_id, s.first_name, s.last_name
+HAVING COUNT(ce.course_id) > 1
+ORDER BY courses_enrolled DESC;
+
+
+
+
+
+
+
+
+
+
+
