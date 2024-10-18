@@ -557,6 +557,87 @@ INSERT INTO course_enrollments (course_enrollments_id, student_id, course_id) VA
 
 SELECT * FROM course_enrollments;
 
+-- Create TRIGGER course_enrollments_id_increment 
+CREATE OR REPLACE TRIGGER course_enrollments_id_increment
+BEFORE INSERT ON course_enrollments
+FOR EACH ROW
+DECLARE
+    max_course_enrollments_id NUMBER;
+BEGIN
+    SELECT 
+    CASE 
+        WHEN MAX(course_enrollments_id) IS NULL THEN 0 ELSE MAX(course_enrollments_id) 
+    END
+    INTO max_course_enrollments_id FROM course_enrollments;
+    :NEW.course_enrollments_id := max_course_enrollments_id + 1;
+END;
+
+-- Create procedure insert_course_enrollment 
+CREATE OR REPLACE PROCEDURE insert_course_enrollment ( p_student_id IN NUMBER, p_course_id IN NUMBER) AS
+BEGIN
+    INSERT INTO course_enrollments (student_id, course_id) VALUES (p_student_id, p_course_id);
+    DBMS_OUTPUT.PUT_LINE('Course enrollment added successfully.');
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('An error occurred');
+END ;
+
+SET SERVEROUTPUT ON;
+DECLARE
+    v_student_id NUMBER := &student_id;
+    v_course_id NUMBER := &course_id;
+BEGIN
+    insert_course_enrollment(v_student_id, v_course_id);
+END;
+
+-- Create procedure update_course_enrollment
+CREATE OR REPLACE PROCEDURE update_course_enrollment ( p_course_enrollments_id IN NUMBER, p_student_id IN NUMBER, p_course_id IN NUMBER) AS
+    v_enrollment_count NUMBER;
+BEGIN
+    SELECT COUNT(*) INTO v_enrollment_count FROM course_enrollments WHERE course_enrollments_id = p_course_enrollments_id;
+    IF v_enrollment_count = 0 THEN
+        DBMS_OUTPUT.PUT_LINE('No course enrollment found');
+    ELSE
+        UPDATE course_enrollments SET student_id = p_student_id, course_id = p_course_id WHERE course_enrollments_id = p_course_enrollments_id;
+        DBMS_OUTPUT.PUT_LINE('Course enrollment updated');
+    END IF;
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('An error occurred');
+END;
+
+SET SERVEROUTPUT ON;
+DECLARE
+    v_course_enrollments_id NUMBER := &course_enrollments_id;
+    v_student_id NUMBER := &student_id;
+    v_course_id NUMBER := &course_id;
+BEGIN
+    update_course_enrollment(v_course_enrollments_id, v_student_id, v_course_id);
+END;
+
+-- Create procedure delete_course_enrollment
+CREATE OR REPLACE PROCEDURE delete_course_enrollment ( p_course_enrollments_id IN NUMBER) AS v_enrollment_count NUMBER;
+BEGIN
+    SELECT COUNT(*) INTO v_enrollment_count FROM course_enrollments WHERE course_enrollments_id = p_course_enrollments_id;
+    IF v_enrollment_count = 0 THEN
+        DBMS_OUTPUT.PUT_LINE('No course enrollment found');
+    ELSE
+        DELETE FROM course_enrollments WHERE course_enrollments_id = p_course_enrollments_id;
+        DBMS_OUTPUT.PUT_LINE('Course enrollment deleted.');
+    END IF;
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('An error occurred');
+END;
+
+SET SERVEROUTPUT ON;
+DECLARE
+    v_course_enrollments_id NUMBER := &course_enrollments_id;
+BEGIN
+    delete_course_enrollment(v_course_enrollments_id);
+END;
+
+
 -- Create a table for assignment
 CREATE TABLE assignment (
     assignment_id  NUMBER PRIMARY KEY,
