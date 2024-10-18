@@ -13,13 +13,321 @@ INSERT INTO departments (department_id, department_name) VALUES (5, 'School of H
 
 SELECT * FROM departments;
 
+-- Create a table for lecturers
+CREATE TABLE lecturers (
+    lecturer_id NUMBER PRIMARY KEY,
+    first_name VARCHAR2(50) NOT NULL,
+    last_name VARCHAR2(50),
+    email VARCHAR2(100) UNIQUE NOT NULL,
+    phone_number VARCHAR2(15) NOT NULL,
+    department_id NUMBER,
+    hire_date DATE NOT NULL ,
+    salary NUMBER CHECK (salary > 0),
+    status VARCHAR2(20) DEFAULT 'Active' CHECK (status IN ('Active','Retired','Resigned')),
+    FOREIGN KEY (department_id) REFERENCES departments (department_id)
+);
+
+INSERT INTO lecturers (lecturer_id, first_name, last_name, email, phone_number, department_id, hire_date, salary, status)
+VALUES (1, 'Nimal', 'Perera', 'nimal.perera@schoolofcomputing.edu', '0711234567', 1, TO_DATE('2020-01-15', 'YYYY-MM-DD'), 80000, 'Active');
+INSERT INTO lecturers (lecturer_id, first_name, last_name, email, phone_number, department_id, hire_date, salary, status)
+VALUES (2, 'Saman', 'Silva', 'saman.silva@schoolofbusiness.edu', '0777654321', 2, TO_DATE('2018-03-10', 'YYYY-MM-DD'), 75000, 'Active');
+INSERT INTO lecturers (lecturer_id, first_name, last_name, email, phone_number, department_id, hire_date, salary, status)
+VALUES (3, 'Kamal', 'Fernando', 'kamal.fernando@schoolofengineering.edu', '0723456789', 3, TO_DATE('2019-08-25', 'YYYY-MM-DD'), 90000, 'Retired');
+INSERT INTO lecturers (lecturer_id, first_name, last_name, email, phone_number, department_id, hire_date, salary, status)
+VALUES (4, 'Sunil', 'Jayasinghe', 'sunil.jayasinghe@schooloflanguage.edu', '0709876543', 4, TO_DATE('2021-06-05', 'YYYY-MM-DD'), 60000, 'Active');
+INSERT INTO lecturers (lecturer_id, first_name, last_name, email, phone_number, department_id, hire_date, salary, status)
+VALUES (5, 'Ruwan', 'Dias', 'ruwan.dias@schoolofhumanities.edu', '0751237894', 5, TO_DATE('2017-12-01', 'YYYY-MM-DD'), 85000, 'Resigned');
+INSERT INTO lecturers (lecturer_id, first_name, last_name, email, phone_number, department_id, hire_date, salary, status)
+VALUES (6, 'Anura', 'Kumara', 'anura.kumara@schoolofcomputing.edu', '0765432123', 1, TO_DATE('2022-02-20', 'YYYY-MM-DD'), 72000, 'Active');
+INSERT INTO lecturers (lecturer_id, first_name, last_name, email, phone_number, department_id, hire_date, salary, status)
+VALUES (7, 'Chamara', 'Senanayake', 'chamara.senanayake@schoolofbusiness.edu', '0719876543', 2, TO_DATE('2016-09-18', 'YYYY-MM-DD'), 78000, 'Active');
+INSERT INTO lecturers (lecturer_id, first_name, last_name, email, phone_number, department_id, hire_date, salary, status)
+VALUES (8, 'Lakmal', 'Wijesinghe', 'lakmal.wijesinghe@schoolofengineering.edu', '0742345678', 3, TO_DATE('2020-05-12', 'YYYY-MM-DD'), 82000, 'Active');
+INSERT INTO lecturers (lecturer_id, first_name, last_name, email, phone_number, department_id, hire_date, salary, status)
+VALUES (9, 'Gayan', 'Weerasinghe', 'gayan.weerasinghe@schooloflanguage.edu', '0773219876', 4, TO_DATE('2021-11-23', 'YYYY-MM-DD'), 61000, 'Active');
+INSERT INTO lecturers (lecturer_id, first_name, last_name, email, phone_number, department_id, hire_date, salary, status)
+VALUES (10, 'Priyantha', 'Rajapaksa', 'priyantha.rajapaksa@schoolofhumanities.edu', '0756789123', 5, TO_DATE('2019-07-30', 'YYYY-MM-DD'), 86000, 'Active');
+
+SELECT * FROM lecturers;
+
+-- Create a table for courses
+CREATE TABLE courses (
+    course_id NUMBER PRIMARY KEY,
+    course_name VARCHAR2(100) UNIQUE NOT NULL,
+    department_id NUMBER NOT NULL,
+    description VARCHAR2(200),
+    credits NUMBER NOT NULL CHECK (credits > 0),
+    start_date DATE NOT NULL,
+    end_date DATE,
+    status VARCHAR2(20) DEFAULT 'Active' CHECK (status IN ('Active', 'Inactive', 'Completed')),
+    created_by NUMBER,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (department_id) REFERENCES departments (department_id),
+    FOREIGN KEY (created_by) REFERENCES lecturers (lecturer_id),
+    CHECK (end_date > start_date)
+);
+
+INSERT INTO courses (course_id, course_name, department_id, description, credits, start_date, end_date, created_by) VALUES 
+(1, 'Diploma in Software Engineering ', 1, 'This program introduces students to the fundamentals of programming', 40, TO_DATE('2024-01-10', 'YYYY-MM-DD'), TO_DATE('2025-01-15', 'YYYY-MM-DD'), 3);
+INSERT INTO courses (course_id, course_name, department_id, description, credits, start_date, end_date, created_by) VALUES 
+(2, 'Higher National Diploma in Software Engineering ', 1, 'This program introduces students to the advances of programming', 45, TO_DATE('2024-05-10', 'YYYY-MM-DD'), TO_DATE('2025-05-15', 'YYYY-MM-DD'), 3);
+INSERT INTO courses (course_id, course_name, department_id, description, credits, start_date, end_date, created_by) VALUES 
+(3, 'Advanced Diploma in Business Management', 2, 'This program introduces students to the fundamentals of Business', 30, TO_DATE('2024-01-10', 'YYYY-MM-DD'), TO_DATE('2025-01-15', 'YYYY-MM-DD'), 3);
+INSERT INTO courses (course_id, course_name, department_id, description, credits, start_date, end_date, created_by) VALUES 
+(4, 'Higher National Diploma in Business Management', 2, 'This program introduces students to the advances of Business', 35, TO_DATE('2024-05-10', 'YYYY-MM-DD'), TO_DATE('2025-05-15', 'YYYY-MM-DD'), 3);
+INSERT INTO courses (course_id, course_name, department_id, description, credits, start_date, end_date, created_by) VALUES 
+(5, 'Diploma in English', 4, 'This program introduces students to the English', 20, TO_DATE('2024-05-10', 'YYYY-MM-DD'), TO_DATE('2025-11-15', 'YYYY-MM-DD'), 3);
+INSERT INTO courses (course_id, course_name, department_id, description, credits, start_date, end_date, created_by) VALUES 
+(6, 'Higher National Diploma in Network Engineering', 1, 'This program introduces students to the fundamentals of Network', 40, TO_DATE('2024-08-10', 'YYYY-MM-DD'), TO_DATE('2025-08-15', 'YYYY-MM-DD'), 3);
+
+SELECT * FROM courses;
+
+-- Create a table for lessons
+CREATE TABLE lessons (
+    lesson_id NUMBER PRIMARY KEY,
+    course_id NUMBER,
+    lesson_name VARCHAR2(100) NOT NULL,
+    taught_by NUMBER NOT NULL,
+    status VARCHAR2(20) DEFAULT 'Active' CHECK (status IN ('Active','Inactive')),
+    created_by NUMBER NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (course_id) REFERENCES courses (course_id),
+    FOREIGN KEY (taught_by) REFERENCES lecturers (lecturer_id),
+    FOREIGN KEY (created_by) REFERENCES lecturers (lecturer_id)
+);
+
+INSERT INTO lessons (lesson_id, course_id, lesson_name, taught_by, created_by) VALUES (1, 1, 'Introduction to Computer Science', 1, 3);
+INSERT INTO lessons (lesson_id, course_id, lesson_name, taught_by, created_by) VALUES (2, 1, 'Mathematics for Computing', 2, 3);
+INSERT INTO lessons (lesson_id, course_id, lesson_name, taught_by, created_by) VALUES (3, 1, 'Database Management Systems', 5, 3);
+INSERT INTO lessons (lesson_id, course_id, lesson_name, taught_by, created_by) VALUES (4, 2, 'Object-Oriented Programming', 4, 3);
+INSERT INTO lessons (lesson_id, course_id, lesson_name, taught_by, created_by) VALUES (5, 2, 'Web Development Basics', 6, 3);
+INSERT INTO lessons (lesson_id, course_id, lesson_name, taught_by, created_by) VALUES (6, 2, 'Programming Fundamentals', 2, 3);
+INSERT INTO lessons (lesson_id, course_id, lesson_name, taught_by, created_by) VALUES (7, 2, 'Electronics and Computer Architecture', 5, 3);
+INSERT INTO lessons (lesson_id, course_id, lesson_name, taught_by, created_by) VALUES (8, 1, 'Computer Networks', 2, 3);
+INSERT INTO lessons (lesson_id, course_id, lesson_name, taught_by, created_by) VALUES (9, 1, 'GUI Application Development', 4, 3);
+INSERT INTO lessons (lesson_id, course_id, lesson_name, taught_by, created_by) VALUES (10, 1, 'Software Engineering', 5, 3);
+INSERT INTO lessons (lesson_id, course_id, lesson_name, taught_by, created_by) VALUES (11, 2, 'Enterprise Application Development', 6, 3);
+INSERT INTO lessons (lesson_id, course_id, lesson_name, taught_by, created_by) VALUES (12, 2, 'Operating Systems', 5, 3);
+INSERT INTO lessons (lesson_id, course_id, lesson_name, taught_by, created_by) VALUES (13, 4, 'Financial Management', 7, 3);
+INSERT INTO lessons (lesson_id, course_id, lesson_name, taught_by, created_by) VALUES (14, 4, 'Environmental Management', 8, 3);
+INSERT INTO lessons (lesson_id, course_id, lesson_name, taught_by, created_by) VALUES (15, 4, 'Marketing Management', 8, 3);
+INSERT INTO lessons (lesson_id, course_id, lesson_name, taught_by, created_by) VALUES (16, 4, 'Legal Environment', 9, 3);
+INSERT INTO lessons (lesson_id, course_id, lesson_name, taught_by, created_by) VALUES (17, 4, 'Human Resource Management', 10, 3);
+INSERT INTO lessons (lesson_id, course_id, lesson_name, taught_by, created_by) VALUES (18, 4, 'Project Management', 10, 3);
+INSERT INTO lessons (lesson_id, course_id, lesson_name, taught_by, created_by) VALUES (19, 4, 'Operations Logistics Management', 9, 3);
+
+SELECT * FROM lessons;
+
+-- Create a table for students
+CREATE TABLE students (
+    student_id NUMBER PRIMARY KEY,
+    first_name VARCHAR2(50) NOT NULL,
+    last_name VARCHAR2(50) NOT NULL,
+    email VARCHAR2(100) UNIQUE NOT NULL,
+    phone_number VARCHAR2(15) NOT NULL,
+    date_of_birth DATE ,
+    gender VARCHAR2(15) ,
+    address VARCHAR2(200),
+    status VARCHAR2(20) DEFAULT 'Active' CHECK (status IN ('Active','students','Suspended')),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+INSERT INTO students (student_id, first_name, last_name, email, phone_number, date_of_birth, gender, address) 
+VALUES (1, 'Amila', 'Perera', 'amilaperera@gmail.com', '0711234567', TO_DATE('2001-05-15', 'YYYY-MM-DD'), 'Male', '123, Colombo Road, Galle');
+INSERT INTO students (student_id, first_name, last_name, email, phone_number, date_of_birth, gender, address) 
+VALUES (2, 'Kasuni', 'Samarasinghe', 'kasunisamarasinghe@gmail.com', '0722345678', TO_DATE('2000-08-25', 'YYYY-MM-DD'), 'Female', '45, Kandy Street, Kandy');
+INSERT INTO students (student_id, first_name, last_name, email, phone_number, date_of_birth, gender, address) 
+VALUES (3, 'Chathura', 'Wijesinghe', 'chathurawijesinghe@gmail.com', '0713456789', TO_DATE('2002-12-10', 'YYYY-MM-DD'), 'Male', '78, Lake View, Kurunegala');
+INSERT INTO students (student_id, first_name, last_name, email, phone_number, date_of_birth, gender, address) 
+VALUES (4, 'Nethmi', 'Jayasinghe', 'nethmijayasinghe@gmail.com', '0704567890', TO_DATE('2003-03-30', 'YYYY-MM-DD'), 'Female', '89, Beach Road, Matara');
+INSERT INTO students (student_id, first_name, last_name, email, phone_number, date_of_birth, gender, address) 
+VALUES (5, 'Sajith', 'Fernando', 'sajithfernando@gmail.com', '0775678901', TO_DATE('2001-07-20', 'YYYY-MM-DD'), 'Male', '65, Temple Lane, Negombo');
+INSERT INTO students (student_id, first_name, last_name, email, phone_number, date_of_birth, gender, address) 
+VALUES (6, 'Nimesha', 'Dissanayake', 'nimeshadissanayake@gmail.com', '0766789012', TO_DATE('2002-04-15', 'YYYY-MM-DD'), 'Female', '21, School Street, Galle');
+INSERT INTO students (student_id, first_name, last_name, email, phone_number, date_of_birth, gender, address) 
+VALUES (7, 'Ravindu', 'Perera', 'ravinduperera@gmail.com', '0757890123', TO_DATE('2001-10-10', 'YYYY-MM-DD'), 'Male', '45, Main Road, Kandy');
+INSERT INTO students (student_id, first_name, last_name, email, phone_number, date_of_birth, gender, address) 
+VALUES (8, 'Dilani', 'Gunasekara', 'dilanigunasekara@gmail.com', '0748901234', TO_DATE('2000-09-22', 'YYYY-MM-DD'), 'Female', '10, Hilltop, Nuwara Eliya');
+INSERT INTO students (student_id, first_name, last_name, email, phone_number, date_of_birth, gender, address) 
+VALUES (9, 'Tharindu', 'Wijesooriya', 'tharinduwijesooriya@gmail.com', '0739012345', TO_DATE('2002-02-18', 'YYYY-MM-DD'), 'Male', '34, River View, Kegalle');
+INSERT INTO students (student_id, first_name, last_name, email, phone_number, date_of_birth, gender, address) 
+VALUES (10, 'Ayesh', 'Rajapaksha', 'ayeshrajapaksha@gmail.com', '0720123456', TO_DATE('2001-06-30', 'YYYY-MM-DD'), 'Male', '88, Ocean Drive, Colombo');
+INSERT INTO students (student_id, first_name, last_name, email, phone_number, date_of_birth, gender, address) 
+VALUES (11, 'Chami', 'Chandimal', 'chamichandimal@gmail.com', '0712345678', TO_DATE('2003-05-25', 'YYYY-MM-DD'), 'Female', '44, Park Avenue, Colombo');
+INSERT INTO students (student_id, first_name, last_name, email, phone_number, date_of_birth, gender, address) 
+VALUES (12, 'Lakmal', 'Senevirathne', 'lakmalsenevirathne@gmail.com', '0703456789', TO_DATE('2001-01-01', 'YYYY-MM-DD'), 'Male', '56, Green Road, Anuradhapura');
+INSERT INTO students (student_id, first_name, last_name, email, phone_number, date_of_birth, gender, address) 
+VALUES (13, 'Nimasha', 'Karunarathne', 'nimashakarunarathne@gmail.com', '0694567890', TO_DATE('2002-11-14', 'YYYY-MM-DD'), 'Female', '23, Forest Lane, Ratnapura');
+INSERT INTO students (student_id, first_name, last_name, email, phone_number, date_of_birth, gender, address) 
+VALUES (14, 'Udara', 'Pathirana', 'udarapathirana@gmail.com', '0685678901', TO_DATE('2003-04-20', 'YYYY-MM-DD'), 'Male', '12, Seaside Avenue, Batticaloa');
+INSERT INTO students (student_id, first_name, last_name, email, phone_number, date_of_birth, gender, address) 
+VALUES (15, 'Dhanuka', 'Silva', 'dhanukasilva@gmail.com', '0676789012', TO_DATE('2000-10-30', 'YYYY-MM-DD'), 'Male', '14, Mountain Road, Matale');
+INSERT INTO students (student_id, first_name, last_name, email, phone_number, date_of_birth, gender, address) 
+VALUES (16, 'Shanika', 'Herath', 'shanikaherath@gmail.com', '0667890123', TO_DATE('2002-03-05', 'YYYY-MM-DD'), 'Female', '19, City Center, Jaffna');
+INSERT INTO students (student_id, first_name, last_name, email, phone_number, date_of_birth, gender, address) 
+VALUES (17, 'Kamal', 'Fernando', 'kamalfernando@gmail.com', '0658901234', TO_DATE('2001-08-12', 'YYYY-MM-DD'), 'Male', '32, New Town, Colombo');
+INSERT INTO students (student_id, first_name, last_name, email, phone_number, date_of_birth, gender, address) 
+VALUES (18, 'Gayan', 'Perera', 'gayanperera@gmail.com', '0649012345', TO_DATE('2003-06-18', 'YYYY-MM-DD'), 'Male', '27, Old Market, Galle');
+INSERT INTO students (student_id, first_name, last_name, email, phone_number, date_of_birth, gender, address) 
+VALUES (19, 'Nihal', 'Bandara', 'nihalbandara@gmail.com', '0630123456', TO_DATE('2000-11-26', 'YYYY-MM-DD'), 'Male', '88, Lake Road, Colombo');
+INSERT INTO students (student_id, first_name, last_name, email, phone_number, date_of_birth, gender, address) 
+VALUES (20, 'Thilini', 'Samarawickrama', 'thilinisanarawickrama@gmail.com', '0621234567', TO_DATE('2002-09-02', 'YYYY-MM-DD'), 'Female', '55, Hill Road, Galle');
+INSERT INTO students (student_id, first_name, last_name, email, phone_number, date_of_birth, gender, address) 
+VALUES (21, 'Anushka', 'Fernando', 'anushkafernando@gmail.com', '0612345678', TO_DATE('2001-12-30', 'YYYY-MM-DD'), 'Female', '75, Church Street, Negombo');
+INSERT INTO students (student_id, first_name, last_name, email, phone_number, date_of_birth, gender, address) 
+VALUES (22, 'Charitha', 'Abeysekera', 'charithaabeysekera@gmail.com', '0603456789', TO_DATE('2002-07-15', 'YYYY-MM-DD'), 'Male', '24, River Lane, Ratnapura');
+INSERT INTO students (student_id, first_name, last_name, email, phone_number, date_of_birth, gender, address) 
+VALUES (23, 'Ruwangi', 'Senevirathne', 'ruwangisenevirathne@gmail.com', '0594567890', TO_DATE('2001-02-28', 'YYYY-MM-DD'), 'Female', '31, City View, Kandy');
+INSERT INTO students (student_id, first_name, last_name, email, phone_number, date_of_birth, gender, address) 
+VALUES (24, 'Kanishka', 'Jayasinghe', 'kanishkajayasinghe@gmail.com', '0585678901', TO_DATE('2003-01-10', 'YYYY-MM-DD'), 'Male', '99, Coastal Road, Matara');
+INSERT INTO students (student_id, first_name, last_name, email, phone_number, date_of_birth, gender, address) 
+VALUES (25, 'Lahiru', 'Kumarasinghe', 'lahirukumarasinghe@gmail.com', '0576789012', TO_DATE('2002-08-20', 'YYYY-MM-DD'), 'Male', '19, Bay Street, Colombo');
+INSERT INTO students (student_id, first_name, last_name, email, phone_number, date_of_birth, gender, address) 
+VALUES (26, 'Janani', 'Rathnayake', 'jananirathnayake@gmail.com', '0567890123', TO_DATE('2001-03-16', 'YYYY-MM-DD'), 'Female', '28, Hill Side, Jaffna');
+INSERT INTO students (student_id, first_name, last_name, email, phone_number, date_of_birth, gender, address) 
+VALUES (27, 'Sachin', 'Jayasuriya', 'sachinjayasuriya@gmail.com', '0558901234', TO_DATE('2000-04-22', 'YYYY-MM-DD'), 'Male', '90, Lake Road, Colombo');
+INSERT INTO students (student_id, first_name, last_name, email, phone_number, date_of_birth, gender, address) 
+VALUES (28, 'Meghna', 'Perera', 'meghnaperera@gmail.com', '0549012345', TO_DATE('2003-07-11', 'YYYY-MM-DD'), 'Female', '45, City Hall, Kandy');
+INSERT INTO students (student_id, first_name, last_name, email, phone_number, date_of_birth, gender, address) 
+VALUES (29, 'Vihanga', 'Jayasena', 'vihangajayasena@gmail.com', '0530123456', TO_DATE('2002-05-05', 'YYYY-MM-DD'), 'Male', '71, Coastal Road, Colombo');
+INSERT INTO students (student_id, first_name, last_name, email, phone_number, date_of_birth, gender, address) 
+VALUES (30, 'Saman', 'Tharindu', 'samantaharindu@gmail.com', '0521234567', TO_DATE('2001-09-30', 'YYYY-MM-DD'), 'Male', '30, Market Street, Nuwara Eliya');
+INSERT INTO students (student_id, first_name, last_name, email, phone_number, date_of_birth, gender, address) 
+VALUES (31, 'Sashini', 'Rajapakse', 'sashinirajapakse@gmail.com', '0512345678', TO_DATE('2000-10-15', 'YYYY-MM-DD'), 'Female', '67, Park Road, Colombo');
+INSERT INTO students (student_id, first_name, last_name, email, phone_number, date_of_birth, gender, address) 
+VALUES (32, 'Harsha', 'Bandarage', 'harshabandara@gmail.com', '0503456789', TO_DATE('2001-11-11', 'YYYY-MM-DD'), 'Male', '90, Green Street, Anuradhapura');
+INSERT INTO students (student_id, first_name, last_name, email, phone_number, date_of_birth, gender, address) 
+VALUES (33, 'Kavindu', 'Gunarathne', 'kavindugunarathne@gmail.com', '0494567890', TO_DATE('2002-08-28', 'YYYY-MM-DD'), 'Male', '32, Central Road, Colombo');
+INSERT INTO students (student_id, first_name, last_name, email, phone_number, date_of_birth, gender, address) 
+VALUES (34, 'Manisha', 'Herath', 'manishaherath@gmail.com', '0485678901', TO_DATE('2003-02-14', 'YYYY-MM-DD'), 'Female', '26, Lake Road, Kandy');
+INSERT INTO students (student_id, first_name, last_name, email, phone_number, date_of_birth, gender, address) 
+VALUES (35, 'Dulanjali', 'Fernando', 'dulanjalifernando@gmail.com', '0476789012', TO_DATE('2001-04-05', 'YYYY-MM-DD'), 'Female', '14, Hilltop, Colombo');
+INSERT INTO students (student_id, first_name, last_name, email, phone_number, date_of_birth, gender, address) 
+VALUES (36, 'Dilshani', 'Seneviratne', 'dilshaniseneviratne@gmail.com', '0467890123', TO_DATE('2002-06-21', 'YYYY-MM-DD'), 'Female', '78, Sea View, Matara');
+INSERT INTO students (student_id, first_name, last_name, email, phone_number, date_of_birth, gender, address) 
+VALUES (37, 'Namal', 'Perera', 'namalperera@gmail.com', '0458901234', TO_DATE('2001-09-12', 'YYYY-MM-DD'), 'Male', '33, Beach Road, Galle');
+INSERT INTO students (student_id, first_name, last_name, email, phone_number, date_of_birth, gender, address) 
+VALUES (38, 'Suwanjana', 'Abeysinghe', 'suwanjanaabeysinghe@gmail.com', '0449012345', TO_DATE('2003-03-22', 'YYYY-MM-DD'), 'Female', '56, Temple Road, Colombo');
+INSERT INTO students (student_id, first_name, last_name, email, phone_number, date_of_birth, gender, address) 
+VALUES (39, 'Hasith', 'Samarasekara', 'hasithsamarasekara@gmail.com', '0430123456', TO_DATE('2002-05-01', 'YYYY-MM-DD'), 'Male', '19, New Road, Ratnapura');
+INSERT INTO students (student_id, first_name, last_name, email, phone_number, date_of_birth, gender, address) 
+VALUES (40, 'Chamila', 'Gunarathne', 'chamilagunarathne@gmail.com', '0421234567', TO_DATE('2000-07-29', 'YYYY-MM-DD'), 'Female', '12, Lake View, Kandy');
+
+SELECT * FROM students;
+
+-- Create a table for course_enrollments
+CREATE TABLE course_enrollments (
+    course_enrollments_id NUMBER PRIMARY KEY,
+    student_id NUMBER NOT NULL,
+    course_id NUMBER NOT NULL,
+    enrollement_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (student_id) REFERENCES students (student_id),
+    FOREIGN KEY (course_id) REFERENCES courses (course_id)
+);
+
+INSERT INTO course_enrollments (course_enrollments_id, student_id, course_id) VALUES (1, 1, 1);
+INSERT INTO course_enrollments (course_enrollments_id, student_id, course_id) VALUES (2, 2, 2);
+INSERT INTO course_enrollments (course_enrollments_id, student_id, course_id) VALUES (3, 3, 1);
+INSERT INTO course_enrollments (course_enrollments_id, student_id, course_id) VALUES (4, 4, 4);
+INSERT INTO course_enrollments (course_enrollments_id, student_id, course_id) VALUES (5, 5, 3);
+
+-- Inserting course enrollments for students
+INSERT INTO course_enrollments (course_enrollments_id, student_id, course_id) VALUES (1, 1, 1);
+INSERT INTO course_enrollments (course_enrollments_id, student_id, course_id) VALUES (2, 2, 1);
+INSERT INTO course_enrollments (course_enrollments_id, student_id, course_id) VALUES (3, 3, 1);
+INSERT INTO course_enrollments (course_enrollments_id, student_id, course_id) VALUES (4, 4, 2);
+INSERT INTO course_enrollments (course_enrollments_id, student_id, course_id) VALUES (5, 5, 2);
+INSERT INTO course_enrollments (course_enrollments_id, student_id, course_id) VALUES (6, 6, 3);
+INSERT INTO course_enrollments (course_enrollments_id, student_id, course_id) VALUES (7, 7, 3);
+INSERT INTO course_enrollments (course_enrollments_id, student_id, course_id) VALUES (8, 8, 4);
+INSERT INTO course_enrollments (course_enrollments_id, student_id, course_id) VALUES (9, 9, 4);
+INSERT INTO course_enrollments (course_enrollments_id, student_id, course_id) VALUES (10, 10, 4);
+INSERT INTO course_enrollments (course_enrollments_id, student_id, course_id) VALUES (11, 11, 1);
+INSERT INTO course_enrollments (course_enrollments_id, student_id, course_id) VALUES (12, 12, 1);
+INSERT INTO course_enrollments (course_enrollments_id, student_id, course_id) VALUES (13, 13, 2);
+INSERT INTO course_enrollments (course_enrollments_id, student_id, course_id) VALUES (14, 14, 2);
+INSERT INTO course_enrollments (course_enrollments_id, student_id, course_id) VALUES (15, 15, 3);
+INSERT INTO course_enrollments (course_enrollments_id, student_id, course_id) VALUES (16, 16, 3);
+INSERT INTO course_enrollments (course_enrollments_id, student_id, course_id) VALUES (17, 17, 4);
+INSERT INTO course_enrollments (course_enrollments_id, student_id, course_id) VALUES (18, 18, 4);
+INSERT INTO course_enrollments (course_enrollments_id, student_id, course_id) VALUES (19, 19, 1);
+INSERT INTO course_enrollments (course_enrollments_id, student_id, course_id) VALUES (20, 20, 1);
+INSERT INTO course_enrollments (course_enrollments_id, student_id, course_id) VALUES (21, 21, 5);
+INSERT INTO course_enrollments (course_enrollments_id, student_id, course_id) VALUES (22, 22, 2);
+INSERT INTO course_enrollments (course_enrollments_id, student_id, course_id) VALUES (23, 23, 3);
+INSERT INTO course_enrollments (course_enrollments_id, student_id, course_id) VALUES (24, 24, 5);
+INSERT INTO course_enrollments (course_enrollments_id, student_id, course_id) VALUES (25, 25, 4);
+INSERT INTO course_enrollments (course_enrollments_id, student_id, course_id) VALUES (26, 26, 4);
+INSERT INTO course_enrollments (course_enrollments_id, student_id, course_id) VALUES (27, 27, 1);
+INSERT INTO course_enrollments (course_enrollments_id, student_id, course_id) VALUES (28, 28, 6);
+INSERT INTO course_enrollments (course_enrollments_id, student_id, course_id) VALUES (29, 29, 2);
+INSERT INTO course_enrollments (course_enrollments_id, student_id, course_id) VALUES (30, 30, 2);
+INSERT INTO course_enrollments (course_enrollments_id, student_id, course_id) VALUES (31, 31, 3);
+INSERT INTO course_enrollments (course_enrollments_id, student_id, course_id) VALUES (32, 32, 3);
+INSERT INTO course_enrollments (course_enrollments_id, student_id, course_id) VALUES (33, 33, 4);
+INSERT INTO course_enrollments (course_enrollments_id, student_id, course_id) VALUES (34, 34, 4);
+INSERT INTO course_enrollments (course_enrollments_id, student_id, course_id) VALUES (35, 35, 1);
+INSERT INTO course_enrollments (course_enrollments_id, student_id, course_id) VALUES (36, 36, 1);
+INSERT INTO course_enrollments (course_enrollments_id, student_id, course_id) VALUES (37, 37, 2);
+INSERT INTO course_enrollments (course_enrollments_id, student_id, course_id) VALUES (38, 38, 2);
+INSERT INTO course_enrollments (course_enrollments_id, student_id, course_id) VALUES (39, 39, 3);
+INSERT INTO course_enrollments (course_enrollments_id, student_id, course_id) VALUES (40, 40, 3);
+
+SELECT * FROM course_enrollments;
+
+-- Create a table for assignment
+CREATE TABLE assignment (
+    assignment_id  NUMBER PRIMARY KEY,
+    assignment_title VARCHAR2(50) NOT NULL,
+    assignment_fiies VARCHAR2(50) NOT NULL,
+    lesson_id NUMBER NOT NULL,
+    post_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    end_date DATE NOT NULL,
+    FOREIGN KEY (lesson_id) REFERENCES lessons (lesson_id)
+);
+
+INSERT INTO assignment (assignment_id, assignment_title, assignment_fiies, lesson_id, end_date) 
+VALUES (1, 'Assignment 1', 'file1.pdf', 1, TO_DATE('2024-10-10', 'YYYY-MM-DD'));
+INSERT INTO assignment (assignment_id, assignment_title, assignment_fiies, lesson_id, end_date) 
+VALUES (2, 'Assignment 2', 'file2.pdf', 2, TO_DATE('2024-10-15', 'YYYY-MM-DD'));
+INSERT INTO assignment (assignment_id, assignment_title, assignment_fiies, lesson_id, end_date) 
+VALUES (3, 'Assignment 3', 'file3.pdf', 3, TO_DATE('2024-10-12', 'YYYY-MM-DD'));
+INSERT INTO assignment (assignment_id, assignment_title, assignment_fiies, lesson_id, end_date) 
+VALUES (4, 'Assignment 4', 'file4.pdf', 4, TO_DATE('2024-10-20', 'YYYY-MM-DD'));
+INSERT INTO assignment (assignment_id, assignment_title, assignment_fiies, lesson_id, end_date) 
+VALUES (5, 'Assignment 5', 'file5.pdf', 5, TO_DATE('2024-10-18', 'YYYY-MM-DD'));
+
+SELECT * FROM assignment;
+
+-- Create a table for assignment_students
+CREATE TABLE assignment_students (
+    assignment_students_id NUMBER PRIMARY KEY,
+    assignment_id  NUMBER NOT NULL,
+    student_id NUMBER NOT NULL,
+    submit_file VARCHAR2(200),
+    submissionDate TIMESTAMP,
+    status VARCHAR2(20),
+    grade VARCHAR2(20),
+    Feedback_on_Assessment VARCHAR2(100) ,
+    FOREIGN KEY (assignment_id) REFERENCES assignment (assignment_id),
+    FOREIGN KEY (student_id) REFERENCES students (student_id)
+);
+
+INSERT INTO assignment_students (assignment_students_id, assignment_id, student_id, submit_file, status, submissionDate) VALUES 
+(1, 1, 1, 'assignment1_student1.docx', 'Submitted',SYSTIMESTAMP);
+
+INSERT INTO assignment_students (assignment_students_id, assignment_id, student_id, submit_file, status, grade, Feedback_on_Assessment, submissionDate) VALUES
+(2, 1, 2, 'assignment1_student2.docx', 'Graded by Lecturer', 'A', 'Very thorough and well-organized.',SYSTIMESTAMP);
+
+SELECT * FROM assignment_students;
+
 -- Create procedure insert_department
 CREATE OR REPLACE PROCEDURE insert_department (i_department_id IN NUMBER, i_department_name IN VARCHAR2) AS
 BEGIN
     INSERT INTO departments (department_id, department_name) VALUES (i_department_id, i_department_name); 
 EXCEPTION
     WHEN OTHERS THEN
-        DBMS_OUTPUT.PUT_LINE('An error occurred '|| SQLERRM);
+        DBMS_OUTPUT.PUT_LINE('An error occurred ');
 END ;
    
 DECLARE
@@ -30,7 +338,7 @@ BEGIN
     DBMS_OUTPUT.PUT_LINE('Department "' || iu_department_name || '" with ID ' || iu_department_id || ' has been successfully added.');
 EXCEPTION
     WHEN OTHERS THEN
-        DBMS_OUTPUT.PUT_LINE('Error inserting department '|| SQLERRM);
+        DBMS_OUTPUT.PUT_LINE('Error inserting department ');
 END; 
 
 -- Create procedure update_department   
@@ -45,8 +353,8 @@ BEGIN
     END IF;
 EXCEPTION
     WHEN OTHERS THEN
-        DBMS_OUTPUT.PUT_LINE('An error occurred '|| SQLERRM);
-END update_department;
+        DBMS_OUTPUT.PUT_LINE('An error occurred ');
+END;
 
 SET SERVEROUTPUT ON;
 DECLARE
@@ -68,7 +376,7 @@ BEGIN
     END IF;
 EXCEPTION
     WHEN OTHERS THEN
-        DBMS_OUTPUT.PUT_LINE('An error occurred '|| SQLERRM);
+        DBMS_OUTPUT.PUT_LINE('An error occurred ');
 END;
 
 SET SERVEROUTPUT ON;
@@ -77,38 +385,6 @@ DECLARE
 BEGIN
     delete_department(v_department_id);
 END;
-
-
--- Create a table for lecturers
-CREATE TABLE lecturers (
-    lecturer_id NUMBER PRIMARY KEY,
-    first_name VARCHAR2(50) NOT NULL,
-    last_name VARCHAR2(50),
-    email VARCHAR2(100) UNIQUE NOT NULL,
-    phone_number VARCHAR2(15) NOT NULL,
-    department_id NUMBER,
-    hire_date DATE NOT NULL ,
-    salary NUMBER CHECK (salary > 0),
-    status VARCHAR2(20) DEFAULT 'Active' CHECK (status IN ('Active','Retired','Resigned')),
-    FOREIGN KEY (department_id) REFERENCES departments (department_id)
-);
-
-INSERT INTO lecturers (lecturer_id, first_name, last_name, email, phone_number, department_id, hire_date, salary) VALUES 
-(1, 'Kasun', 'Sandaru', 'Kasun21@gmail.com', '0712345678', 1, TO_DATE('2020-01-15', 'YYYY-MM-DD'), 50000);
-INSERT INTO lecturers (lecturer_id, first_name, last_name, email, phone_number, department_id, hire_date, salary) VALUES 
-(2, 'Nisal', 'Yasmith', 'Nisal43@gmail.com', '0723456789', 2, TO_DATE('2019-03-20', 'YYYY-MM-DD'), 60000);
-INSERT INTO lecturers (lecturer_id, first_name, last_name, email, phone_number, department_id, hire_date, salary) VALUES 
-(3, 'Thili', 'Perera', 'Thili123@gmail.com', '0734567890', NULL, TO_DATE('2021-06-10', 'YYYY-MM-DD'), 45000);
-INSERT INTO lecturers (lecturer_id, first_name, last_name, email, phone_number, department_id, hire_date, salary) VALUES 
-(4, 'Sathmi', 'Dissanayake', 'Sathmi54@gmail.com', '0745678901', 1, TO_DATE('2018-09-30', 'YYYY-MM-DD'), 70000);
-INSERT INTO lecturers (lecturer_id, first_name, last_name, email, phone_number, department_id, hire_date, salary) VALUES 
-(5, 'Chamal', 'Weerasinghe', 'Chamal@gmail.com', '0756789012', 2, TO_DATE('2022-02-25', 'YYYY-MM-DD'), 55000);
-INSERT INTO lecturers (lecturer_id, first_name, last_name, email, phone_number, department_id, hire_date, salary) VALUES 
-(6, 'Nethmi', 'Tharushika', 'Nethmi@gmail.com', '0756789012', 4, TO_DATE('2022-02-25', 'YYYY-MM-DD'), 55000);
-
-SELECT * FROM lecturers;
-
-UPDATE lecturers SET status = 'Retired' WHERE lecturer_id = 6;
 
 -- Create procedure insert_lecturer 
 CREATE OR REPLACE PROCEDURE insert_lecturer (p_lecturer_id IN NUMBER, p_first_name IN VARCHAR2, p_last_name IN VARCHAR2, p_email IN VARCHAR2,
@@ -149,7 +425,7 @@ BEGIN
     END IF;
 EXCEPTION
     WHEN OTHERS THEN
-        DBMS_OUTPUT.PUT_LINE('An error occurred');
+        DBMS_OUTPUT.PUT_LINE('An error occurred'|| SQLERRM);
 END;
 
 SET SERVEROUTPUT ON;
@@ -183,41 +459,6 @@ BEGIN
     delete_lecturer(v_lecturer_id);
 END;
 /
-
-
--- Create a table for courses
-CREATE TABLE courses (
-    course_id NUMBER PRIMARY KEY,
-    course_name VARCHAR2(100) UNIQUE NOT NULL,
-    department_id NUMBER NOT NULL,
-    description VARCHAR2(200),
-    credits NUMBER NOT NULL CHECK (credits > 0),
-    start_date DATE NOT NULL,
-    end_date DATE,
-    status VARCHAR2(20) DEFAULT 'Active' CHECK (status IN ('Active', 'Inactive', 'Completed')),
-    created_by NUMBER,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (department_id) REFERENCES departments (department_id),
-    FOREIGN KEY (created_by) REFERENCES lecturers (lecturer_id),
-    CHECK (end_date > start_date)
-);
-
-INSERT INTO courses (course_id, course_name, department_id, description, credits, start_date, end_date, created_by) VALUES 
-(1, 'Diploma in Software Engineering ', 1, 'This program introduces students to the fundamentals of programming', 40, TO_DATE('2024-01-10', 'YYYY-MM-DD'), TO_DATE('2025-01-15', 'YYYY-MM-DD'), 3);
-INSERT INTO courses (course_id, course_name, department_id, description, credits, start_date, end_date, created_by) VALUES 
-(2, 'Higher National Diploma in Software Engineering ', 1, 'This program introduces students to the advances of programming', 45, TO_DATE('2024-05-10', 'YYYY-MM-DD'), TO_DATE('2025-05-15', 'YYYY-MM-DD'), 3);
-INSERT INTO courses (course_id, course_name, department_id, description, credits, start_date, end_date, created_by) VALUES 
-(3, 'Advanced Diploma in Business Management', 2, 'This program introduces students to the fundamentals of Business', 30, TO_DATE('2024-01-10', 'YYYY-MM-DD'), TO_DATE('2025-01-15', 'YYYY-MM-DD'), 3);
-INSERT INTO courses (course_id, course_name, department_id, description, credits, start_date, end_date, created_by) VALUES 
-(4, 'Higher National Diploma in Business Management', 2, 'This program introduces students to the advances of Business', 35, TO_DATE('2024-05-10', 'YYYY-MM-DD'), TO_DATE('2025-05-15', 'YYYY-MM-DD'), 3);
-INSERT INTO courses (course_id, course_name, department_id, description, credits, start_date, end_date, created_by) VALUES 
-(5, 'Diploma in English', 4, 'This program introduces students to the English', 20, TO_DATE('2024-05-10', 'YYYY-MM-DD'), TO_DATE('2025-11-15', 'YYYY-MM-DD'), 3);
-INSERT INTO courses (course_id, course_name, department_id, description, credits, start_date, end_date, created_by) VALUES 
-(6, 'Higher National Diploma in Network Engineering', 1, 'This program introduces students to the fundamentals of Network', 40, TO_DATE('2024-08-10', 'YYYY-MM-DD'), TO_DATE('2025-08-15', 'YYYY-MM-DD'), 3);
-
-UPDATE courses SET status = 'Inactive' WHERE course_id = 1;
-
-SELECT * FROM courses;
 
 -- Create procedure insert_course 
 CREATE OR REPLACE PROCEDURE insert_course (p_course_id IN NUMBER, p_course_name IN VARCHAR2, p_department_id IN NUMBER, p_description IN VARCHAR2, p_credits IN NUMBER,
@@ -296,43 +537,6 @@ BEGIN
     delete_course(v_course_id);
 END;
 
-
--- Create a table for lessons
-CREATE TABLE lessons (
-    lesson_id NUMBER PRIMARY KEY,
-    course_id NUMBER,
-    lesson_name VARCHAR2(100) NOT NULL,
-    taught_by NUMBER NOT NULL,
-    status VARCHAR2(20) DEFAULT 'Active' CHECK (status IN ('Active','Inactive')),
-    created_by NUMBER NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (course_id) REFERENCES courses (course_id),
-    FOREIGN KEY (taught_by) REFERENCES lecturers (lecturer_id),
-    FOREIGN KEY (created_by) REFERENCES lecturers (lecturer_id)
-);
-
-INSERT INTO lessons (lesson_id, course_id, lesson_name, taught_by, created_by) VALUES (1, 1, 'Introduction to Computer Science', 1, 3);
-INSERT INTO lessons (lesson_id, course_id, lesson_name, taught_by, created_by) VALUES (2, 1, 'Mathematics for Computing', 2, 3);
-INSERT INTO lessons (lesson_id, course_id, lesson_name, taught_by, created_by) VALUES (3, 1, 'Database Management Systems', 1, 3);
-INSERT INTO lessons (lesson_id, course_id, lesson_name, taught_by, created_by) VALUES (4, 2, 'Object-Oriented Programming', 2, 3);
-INSERT INTO lessons (lesson_id, course_id, lesson_name, taught_by, created_by) VALUES (5, 2, 'Web Development Basics', 2, 3);
-INSERT INTO lessons (lesson_id, course_id, lesson_name, taught_by, created_by) VALUES (6, 2, 'Programming Fundamentals', 2, 3);
-INSERT INTO lessons (lesson_id, course_id, lesson_name, taught_by, created_by) VALUES (7, 2, 'Electronics and Computer Architecture', 2, 3);
-INSERT INTO lessons (lesson_id, course_id, lesson_name, taught_by, created_by) VALUES (8, 1, 'Computer Networks', 2, 3);
-INSERT INTO lessons (lesson_id, course_id, lesson_name, taught_by, created_by) VALUES (9, 1, 'GUI Application Development', 2, 3);
-INSERT INTO lessons (lesson_id, course_id, lesson_name, taught_by, created_by) VALUES (10, 1, 'Software Engineering', 2, 3);
-INSERT INTO lessons (lesson_id, course_id, lesson_name, taught_by, created_by) VALUES (11, 2, 'Enterprise Application Development', 1, 3);
-INSERT INTO lessons (lesson_id, course_id, lesson_name, taught_by, created_by) VALUES (12, 2, 'Operating Systems', 2, 3);
-INSERT INTO lessons (lesson_id, course_id, lesson_name, taught_by, created_by) VALUES (13, 4, 'Financial Management', 1, 3);
-INSERT INTO lessons (lesson_id, course_id, lesson_name, taught_by, created_by) VALUES (14, 4, 'Environmental Management', 2, 3);
-INSERT INTO lessons (lesson_id, course_id, lesson_name, taught_by, created_by) VALUES (15, 4, 'Marketing Management', 2, 3);
-INSERT INTO lessons (lesson_id, course_id, lesson_name, taught_by, created_by) VALUES (16, 4, 'Legal Environment', 2, 3);
-INSERT INTO lessons (lesson_id, course_id, lesson_name, taught_by, created_by) VALUES (17, 4, 'Human Resource Management', 2, 3);
-INSERT INTO lessons (lesson_id, course_id, lesson_name, taught_by, created_by) VALUES (18, 4, 'Project Management', 2, 3);
-INSERT INTO lessons (lesson_id, course_id, lesson_name, taught_by, created_by) VALUES (19, 4, 'Operations & Logistics Management', 2, 3);
-
-SELECT * FROM lessons;
-
 -- Create procedure insert_lesson 
 CREATE OR REPLACE PROCEDURE insert_lesson ( p_lesson_id IN NUMBER, p_course_id IN NUMBER, p_lesson_name IN VARCHAR2,
     p_taught_by IN NUMBER, p_created_by IN NUMBER) AS 
@@ -406,40 +610,6 @@ BEGIN
     delete_lesson(v_lesson_id);
 END;
 /
-
--- Create a table for students
-CREATE TABLE students (
-    student_id NUMBER PRIMARY KEY,
-    first_name VARCHAR2(50) NOT NULL,
-    last_name VARCHAR2(50) NOT NULL,
-    email VARCHAR2(100) UNIQUE NOT NULL,
-    phone_number VARCHAR2(15) NOT NULL,
-    date_of_birth DATE ,
-    gender VARCHAR2(15) ,
-    address VARCHAR2(200),
-    status VARCHAR2(20) DEFAULT 'Active' CHECK (status IN ('Active','students','Suspended')),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-INSERT INTO students (student_id, first_name, last_name, email, phone_number, date_of_birth, gender, address) 
-VALUES (1, 'Amila', 'Perera', 'amilaperera@gmail.com', '0711234567', TO_DATE('2001-05-15', 'YYYY-MM-DD'), 'Male', '123, Colombo Road, Galle');
-
-INSERT INTO students (student_id, first_name, last_name, email, phone_number, date_of_birth, gender, address) 
-VALUES (2, 'Kasuni', 'Samarasinghe', 'kasunisamarasinghe@gmail.com', '0722345678', TO_DATE('2000-08-25', 'YYYY-MM-DD'), 'Female', '45, Kandy Street, Kandy');
-
-INSERT INTO students (student_id, first_name, last_name, email, phone_number, date_of_birth, gender, address) 
-VALUES (3, 'Chathura', 'Wijesinghe', 'chathurawijesinghe@gmail.com', '0713456789', TO_DATE('2002-12-10', 'YYYY-MM-DD'), 'Male', '78, Lake View, Kurunegala');
-
-INSERT INTO students (student_id, first_name, last_name, email, phone_number, date_of_birth, gender, address) 
-VALUES (4, 'Nethmi', 'Jayasinghe', 'nethmijayasinghe@gmail.com', '0704567890', TO_DATE('2003-03-30', 'YYYY-MM-DD'), 'Female', '89, Beach Road, Matara');
-
-INSERT INTO students (student_id, first_name, last_name, email, phone_number, date_of_birth, gender, address) 
-VALUES (5, 'Sajith', 'Fernando', 'sajithfernando@gmail.com', '0775678901', TO_DATE('2001-07-20', 'YYYY-MM-DD'), 'Male', '65, Temple Lane, Negombo');
-
-UPDATE students SET status = 'students' WHERE student_id = 1;
-UPDATE students SET status = 'Suspended' WHERE student_id = 1;
-
-SELECT * FROM students;
 
 -- Create TRIGGER student_id_increment 
 CREATE OR REPLACE TRIGGER student_id_increment
@@ -537,26 +707,6 @@ BEGIN
     delete_student(v_student_id);
 END;
 
-
-
--- Create a table for course_enrollments
-CREATE TABLE course_enrollments (
-    course_enrollments_id NUMBER PRIMARY KEY,
-    student_id NUMBER NOT NULL,
-    course_id NUMBER NOT NULL,
-    enrollement_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (student_id) REFERENCES students (student_id),
-    FOREIGN KEY (course_id) REFERENCES courses (course_id)
-);
-
-INSERT INTO course_enrollments (course_enrollments_id, student_id, course_id) VALUES (1, 1, 1);
-INSERT INTO course_enrollments (course_enrollments_id, student_id, course_id) VALUES (2, 2, 2);
-INSERT INTO course_enrollments (course_enrollments_id, student_id, course_id) VALUES (3, 3, 1);
-INSERT INTO course_enrollments (course_enrollments_id, student_id, course_id) VALUES (4, 4, 4);
-INSERT INTO course_enrollments (course_enrollments_id, student_id, course_id) VALUES (5, 5, 3);
-
-SELECT * FROM course_enrollments;
-
 -- Create TRIGGER course_enrollments_id_increment 
 CREATE OR REPLACE TRIGGER course_enrollments_id_increment
 BEFORE INSERT ON course_enrollments
@@ -637,54 +787,6 @@ BEGIN
     delete_course_enrollment(v_course_enrollments_id);
 END;
 
-
--- Create a table for assignment
-CREATE TABLE assignment (
-    assignment_id  NUMBER PRIMARY KEY,
-    assignment_title VARCHAR2(50) NOT NULL,
-    assignment_fiies VARCHAR2(50) NOT NULL,
-    lesson_id NUMBER NOT NULL,
-    post_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    end_date DATE NOT NULL,
-    FOREIGN KEY (lesson_id) REFERENCES lessons (lesson_id)
-);
-
-INSERT INTO assignment (assignment_id, assignment_title, assignment_fiies, lesson_id, end_date) 
-VALUES (1, 'Assignment 1', 'file1.pdf', 1, TO_DATE('2024-10-10', 'YYYY-MM-DD'));
-INSERT INTO assignment (assignment_id, assignment_title, assignment_fiies, lesson_id, end_date) 
-VALUES (2, 'Assignment 2', 'file2.pdf', 2, TO_DATE('2024-10-15', 'YYYY-MM-DD'));
-INSERT INTO assignment (assignment_id, assignment_title, assignment_fiies, lesson_id, end_date) 
-VALUES (3, 'Assignment 3', 'file3.pdf', 3, TO_DATE('2024-10-12', 'YYYY-MM-DD'));
-INSERT INTO assignment (assignment_id, assignment_title, assignment_fiies, lesson_id, end_date) 
-VALUES (4, 'Assignment 4', 'file4.pdf', 4, TO_DATE('2024-10-20', 'YYYY-MM-DD'));
-INSERT INTO assignment (assignment_id, assignment_title, assignment_fiies, lesson_id, end_date) 
-VALUES (5, 'Assignment 5', 'file5.pdf', 5, TO_DATE('2024-10-18', 'YYYY-MM-DD'));
-
-SELECT * FROM assignment;
-    
--- Create a table for assignment_students
-CREATE TABLE assignment_students (
-    assignment_students_id NUMBER PRIMARY KEY,
-    assignment_id  NUMBER NOT NULL,
-    student_id NUMBER NOT NULL,
-    submit_file VARCHAR2(200),
-    submissionDate TIMESTAMP,
-    status VARCHAR2(20),
-    grade VARCHAR2(20),
-    Feedback_on_Assessment VARCHAR2(100) ,
-    FOREIGN KEY (assignment_id) REFERENCES assignment (assignment_id),
-    FOREIGN KEY (student_id) REFERENCES students (student_id)
-);
-
-INSERT INTO assignment_students (assignment_students_id, assignment_id, student_id, submit_file, status, submissionDate) VALUES 
-(1, 1, 1, 'assignment1_student1.docx', 'Submitted',SYSTIMESTAMP);
-
-INSERT INTO assignment_students (assignment_students_id, assignment_id, student_id, submit_file, status, grade, Feedback_on_Assessment, submissionDate) VALUES
-(2, 1, 2, 'assignment1_student2.docx', 'Graded by Lecturer', 'A', 'Very thorough and well-organized.',SYSTIMESTAMP);
-
-SELECT * FROM assignment_students;
-
-
 -- Create a table for students_feedback
 CREATE TABLE students_feedback (
     feedback_id NUMBER PRIMARY KEY,
@@ -698,8 +800,6 @@ CREATE TABLE students_feedback (
 );
 
 INSERT INTO students_feedback (feedback_id, lesson_id, student_id, comments, rating) VALUES (1, 1, 1, 'The lesson was very informative and engaging.', 5);
-
-SELECT * FROM students_feedback;
 
 -- Create a TRIGGER for assignment_idincrement
 CREATE OR REPLACE TRIGGER assignment_idincrement
@@ -738,20 +838,6 @@ BEGIN
 END;
 /
 
--- Create a PROCEDURE for submit_assignment_student
-CREATE OR REPLACE PROCEDURE submit_assignment_student (p_assignment_id IN NUMBER,p_assignment_students_id IN NUMBER,p_submit_file IN VARCHAR2) AS
-BEGIN
-    UPDATE ADMIN.assignment_students SET submit_file = p_submit_file, status = 'Submitted', submissionDate = SYSTIMESTAMP
-    WHERE assignment_id = p_assignment_id AND assignment_students_id = p_assignment_students_id;
-    DBMS_OUTPUT.PUT_LINE('Record updated successfully');
-EXCEPTION
-    WHEN NO_DATA_FOUND THEN
-        DBMS_OUTPUT.PUT_LINE('No record found');
-    WHEN OTHERS THEN
-        DBMS_OUTPUT.PUT_LINE('Error');
-END;
-/
-
 -- Create a PROCEDURE for insert_assignment
 CREATE OR REPLACE PROCEDURE insert_assignment (p_assignment_title IN VARCHAR2, p_assignment_fiies IN VARCHAR2, p_lesson_id IN NUMBER, p_end_date IN DATE) AS
 BEGIN
@@ -762,17 +848,97 @@ EXCEPTION
 END;
 /
 
+SET SERVEROUTPUT ON;
+DECLARE
+    v_assignment_title VARCHAR2(255);
+    v_assignment_fiies VARCHAR2(255);
+    v_lesson_id NUMBER;
+    v_end_date DATE;
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('Enter Assignment Title:');
+    v_assignment_title := '&assignment_title';
+    DBMS_OUTPUT.PUT_LINE('Enter Assignment File Name:');
+    v_assignment_fiies := '&assignment_fiies';
+    DBMS_OUTPUT.PUT_LINE('Enter Lesson ID:');
+    v_lesson_id := &lesson_id;
+    DBMS_OUTPUT.PUT_LINE('Enter End Date(YYYY-MM-DD):');
+    v_end_date := TO_DATE('&end_date','YYYY-MM-DD');
+    ADMIN.insert_assignment(v_assignment_title, v_assignment_fiies, v_lesson_id, v_end_date);
+    DBMS_OUTPUT.PUT_LINE('Assignment inserted successfully');
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error occurred');
+END;
+/
+
+-- Create a PROCEDURE for submit_assignment_student
+CREATE OR REPLACE PROCEDURE submit_assignment_student (p_assignment_id IN NUMBER,p_students_id IN NUMBER,p_submit_file IN VARCHAR2) AS
+BEGIN
+    UPDATE ADMIN.assignment_students SET submit_file = p_submit_file, status = 'Submitted', submissionDate = SYSTIMESTAMP
+    WHERE assignment_id = p_assignment_id AND student_id = p_students_id;
+    DBMS_OUTPUT.PUT_LINE('Record updated successfully');
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('No record found');
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error');
+END;
+/
+
+SET SERVEROUTPUT ON;
+DECLARE
+    v_assignment_id NUMBER;
+    v_students_id NUMBER;
+    v_submit_file VARCHAR2(255);
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('Enter Assignment ID:');
+    v_assignment_id := &assignment_id;
+    DBMS_OUTPUT.PUT_LINE('Enter Assignment Student ID:');
+    v_students_id := &students_id;
+    DBMS_OUTPUT.PUT_LINE('Enter Submit File Name:');
+    v_submit_file := '&submit_file';
+    ADMIN.submit_assignment_student(v_assignment_id, v_students_id, v_submit_file);
+    DBMS_OUTPUT.PUT_LINE('Assignment student record updated successfully.');
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error occurred');
+END;
+/
+
 -- Create a PROCEDURE for grade_assignment_student
-CREATE OR REPLACE PROCEDURE grade_assignment_student (p_assignment_id IN NUMBER,p_assignment_students_id IN NUMBER,p_grade IN VARCHAR2,p_feedback IN VARCHAR2) AS
+CREATE OR REPLACE PROCEDURE grade_assignment_student (p_assignment_id IN NUMBER,p_student_id IN NUMBER,p_grade IN VARCHAR2,p_feedback IN VARCHAR2) AS
 BEGIN
     UPDATE ADMIN.assignment_students SET status = 'Graded', grade = p_grade, Feedback_on_Assessment = p_feedback
-    WHERE assignment_id = p_assignment_id AND assignment_students_id = p_assignment_students_id;
+    WHERE assignment_id = p_assignment_id AND student_id = p_student_id;
     DBMS_OUTPUT.PUT_LINE('Assignment student record graded successfully.');
 EXCEPTION
     WHEN NO_DATA_FOUND THEN
         DBMS_OUTPUT.PUT_LINE('No record found');
     WHEN OTHERS THEN
         DBMS_OUTPUT.PUT_LINE('Error occurred');
+END;
+/
+
+SET SERVEROUTPUT ON;
+DECLARE
+    v_assignment_id NUMBER;
+    v_student_id NUMBER;
+    v_grade VARCHAR2(20);
+    v_feedback VARCHAR2(100);
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('Enter Assignment ID:');
+    v_assignment_id := &assignment_id;
+    DBMS_OUTPUT.PUT_LINE('Enter Assignment Student ID:');
+    v_student_id := &student_id;
+    DBMS_OUTPUT.PUT_LINE('Enter Grade:');
+    v_grade := '&grade';
+    DBMS_OUTPUT.PUT_LINE('Enter Feedback:');
+    v_feedback := '&feedback';
+    ADMIN.grade_assignment_student(v_assignment_id, v_student_id, v_grade, v_feedback);
+    DBMS_OUTPUT.PUT_LINE('Assignment student record updated successfully.');
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error occurred.');
 END;
 /
 
@@ -809,6 +975,35 @@ EXCEPTION
 END;
 /
 
+SET SERVEROUTPUT ON;
+DECLARE
+    v_course_id NUMBER;
+    v_student_id NUMBER;
+    v_comments VARCHAR2(255);
+    v_rating NUMBER;
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('Enter Course ID:');
+    v_course_id := &course_id;
+    DBMS_OUTPUT.PUT_LINE('Enter Student ID:');
+    v_student_id := &student_id;
+    DBMS_OUTPUT.PUT_LINE('Enter Comments:');
+    v_comments := '&comments';   
+    DBMS_OUTPUT.PUT_LINE('Enter Rating (1-5):');
+    v_rating := &rating;
+    ADMIN.insert_student_feedback(v_course_id, v_student_id, v_comments, v_rating);
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('An error occurred: ' || SQLERRM);
+END;
+/
+
+INSERT INTO students_feedback (lesson_id, student_id, comments, rating) 
+VALUES (1, 2, 'I enjoyed the interactive activities and practical examples.', 5);
+INSERT INTO students_feedback (lesson_id, student_id, comments, rating) 
+VALUES (1, 11, 'Very detailed and helpful. I learned a lot from this lesson.', 4);
+INSERT INTO students_feedback (lesson_id, student_id, comments, rating) 
+VALUES (1, 19, 'The lesson was engaging, but the lecture duration was too long.', 3);
+
 -- Create a PROCEDURE for get_feedback_by_lecturer
 CREATE OR REPLACE PROCEDURE get_feedback_by_lecturer (p_lecturer_id IN NUMBER) AS feedback_found BOOLEAN := FALSE;
 BEGIN
@@ -828,6 +1023,16 @@ EXCEPTION
     WHEN OTHERS THEN
         DBMS_OUTPUT.PUT_LINE('An error occurred');
 END get_feedback_by_lecturer;
+/
+
+SET SERVEROUTPUT ON;
+DECLARE
+    v_lecturer_id NUMBER;
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('Enter Lecturer ID:');
+    v_lecturer_id := &lecturer_id;
+    ADMIN.get_feedback_by_lecturer(v_lecturer_id);
+END;
 /
 
 --Number of Courses Offered by Each Department
@@ -893,7 +1098,14 @@ HAVING COUNT(ce.course_id) > 1
 ORDER BY courses_enrolled DESC;
 
 
-
+SELECT * FROM departments;
+SELECT * FROM lecturers;
+SELECT * FROM courses;
+SELECT * FROM course_enrollments;
+SELECT * FROM students;
+SELECT * FROM assignment;
+SELECT * FROM assignment_students;
+SELECT * FROM students_feedback;
 
 
 

@@ -1,6 +1,5 @@
 SELECT * FROM ADMIN.assignment_students;
 SELECT * FROM ADMIN.assignment_students WHERE student_id = 1;
-
 SELECT * FROM ADMIN.assignment_students WHERE student_id = 1 AND assignment_id = 1;
 
 -- Submit assignment
