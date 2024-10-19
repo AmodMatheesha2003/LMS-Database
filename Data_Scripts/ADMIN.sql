@@ -321,6 +321,39 @@ INSERT INTO assignment_students (assignment_students_id, assignment_id, student_
 
 SELECT * FROM assignment_students;
 
+-- Create a table for students_feedback
+CREATE TABLE students_feedback (
+    feedback_id NUMBER PRIMARY KEY,
+    lesson_id NUMBER NOT NULL,
+    student_id NUMBER NOT NULL,
+    comments VARCHAR2(100) NOT NULL,
+    rating NUMBER NOT NULL CHECK (rating BETWEEN 1 AND 5),
+    post_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (lesson_id) REFERENCES lessons (lesson_id),
+    FOREIGN KEY (student_id) REFERENCES students (student_id)
+);
+
+INSERT INTO students_feedback (feedback_id, lesson_id, student_id, comments, rating) VALUES (1, 1, 1, 'The lesson was very informative and engaging.', 5);
+
+SELECT * FROM students_feedback;
+
+-- Create a table for schedule
+CREATE TABLE schedule (
+    schedule_id NUMBER PRIMARY KEY,
+    lesson_id NUMBER NOT NULL,
+    schedule_date DATE NOT NULL,
+    lecture_hall VARCHAR2(50) NOT NULL,
+    FOREIGN KEY (lesson_id) REFERENCES lessons (lesson_id)
+);
+
+INSERT INTO schedule (schedule_id, lesson_id, schedule_date, lecture_hall) VALUES (1, 1, TO_DATE('2024-10-22', 'YYYY-MM-DD'), 'Lecture Hall 01');
+INSERT INTO schedule (schedule_id, lesson_id, schedule_date, lecture_hall) VALUES (2, 2, TO_DATE('2024-10-23', 'YYYY-MM-DD'), 'Lecture Hall 02');
+INSERT INTO schedule (schedule_id, lesson_id, schedule_date, lecture_hall) VALUES (3, 1, TO_DATE('2024-10-24', 'YYYY-MM-DD'), 'Lecture Hall 03');
+INSERT INTO schedule (schedule_id, lesson_id, schedule_date, lecture_hall) VALUES (4, 4, TO_DATE('2024-10-25', 'YYYY-MM-DD'), 'Lecture Hall 04');
+INSERT INTO schedule (schedule_id, lesson_id, schedule_date, lecture_hall) VALUES (5, 1, TO_DATE('2024-10-26', 'YYYY-MM-DD'), 'Lecture Hall 05');
+
+SELECT * FROM schedule;
+
 -- Create procedure insert_department
 CREATE OR REPLACE PROCEDURE insert_department (i_department_id IN NUMBER, i_department_name IN VARCHAR2) AS
 BEGIN
@@ -787,20 +820,6 @@ BEGIN
     delete_course_enrollment(v_course_enrollments_id);
 END;
 
--- Create a table for students_feedback
-CREATE TABLE students_feedback (
-    feedback_id NUMBER PRIMARY KEY,
-    lesson_id NUMBER NOT NULL,
-    student_id NUMBER NOT NULL,
-    comments VARCHAR2(100) NOT NULL,
-    rating NUMBER NOT NULL CHECK (rating BETWEEN 1 AND 5),
-    post_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (lesson_id) REFERENCES lessons (lesson_id),
-    FOREIGN KEY (student_id) REFERENCES students (student_id)
-);
-
-INSERT INTO students_feedback (feedback_id, lesson_id, student_id, comments, rating) VALUES (1, 1, 1, 'The lesson was very informative and engaging.', 5);
-
 -- Create a TRIGGER for assignment_idincrement
 CREATE OR REPLACE TRIGGER assignment_idincrement
 BEFORE INSERT ON assignment
@@ -1035,9 +1054,60 @@ BEGIN
 END;
 /
 
---Number of Courses Offered by Each Department
-SELECT d.department_name, COUNT(c.course_id) AS number_of_courses FROM departments d LEFT JOIN courses c ON d.department_id = c.department_id
-GROUP BY d.department_name ORDER BY number_of_courses DESC;
+--Trigger to Increment Schedule ID Before Insert
+CREATE OR REPLACE TRIGGER schedule_id_increment
+BEFORE INSERT ON schedule
+FOR EACH ROW
+DECLARE
+    max_schedule_id NUMBER;
+BEGIN
+    SELECT 
+        CASE 
+            WHEN MAX(schedule_id) IS NULL THEN 0 ELSE MAX(schedule_id) 
+        END
+    INTO max_schedule_id 
+    FROM schedule;
+    :NEW.schedule_id := max_schedule_id + 1;
+END;
+/
+
+select * from schedule;
+
+CREATE OR REPLACE PROCEDURE add_schedule_proc(
+    p_lesson_id lessons.lesson_id%TYPE,
+    p_schedule_date schedule.schedule_date%TYPE,
+    p_lecture_hall schedule.lecture_hall%TYPE) IS
+BEGIN
+    INSERT INTO schedule (lesson_id, schedule_date, lecture_hall)
+    VALUES (p_lesson_id, p_schedule_date, p_lecture_hall);
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error');
+END;
+/
+
+BEGIN
+    add_schedule_proc(1, TO_DATE('2024-10-26', 'YYYY-MM-DD'), 'Lecture Hall 05');
+END;
+/
+
+--Display Lesson and Schedule Details Using Cursor
+SET SERVEROUTPUT ON;
+DECLARE
+    CURSOR schedule_cursor IS 
+        SELECT schedule_id, lesson_id, schedule_date, lecture_hall FROM schedule;
+    schedule_rec schedule_cursor%ROWTYPE;
+    lesson_name lessons.lesson_name%TYPE;
+BEGIN
+    FOR schedule_rec IN schedule_cursor LOOP
+        SELECT lesson_name INTO lesson_name FROM lessons WHERE lesson_id = schedule_rec.lesson_id;
+        DBMS_OUTPUT.PUT_LINE('Lesson Name: ' || lesson_name);
+        DBMS_OUTPUT.PUT_LINE('Schedule Date: ' || TO_CHAR(schedule_rec.schedule_date, 'DD-MON-YYYY'));
+        DBMS_OUTPUT.PUT_LINE('Lecture Hall: ' || schedule_rec.lecture_hall);
+        DBMS_OUTPUT.PUT_LINE(' ');
+    END LOOP;
+END;
+/
 
 --Number of lessons and courses Offered by Each Department
 SELECT d.department_id, d.department_name, COUNT(DISTINCT c.course_id) AS total_courses, COUNT(l.lesson_id) AS total_lessons
@@ -1045,11 +1115,11 @@ FROM departments d LEFT JOIN courses c ON d.department_id = c.department_id
 LEFT JOIN lessons l ON c.course_id = l.course_id
 GROUP BY d.department_id, d.department_name ORDER BY d.department_name;
 
---Lecturers Who Have Taught More Than 3 Lessons
+--Lecturers Who Have Taught More Than 2 Lessons
 SELECT l.lecturer_id, l.first_name, l.last_name, COUNT(ls.lesson_id) AS lessons_taught
 FROM lecturers l INNER JOIN lessons ls ON l.lecturer_id = ls.taught_by
 GROUP BY l.lecturer_id, l.first_name, l.last_name
-HAVING COUNT(ls.lesson_id) > 3
+HAVING COUNT(ls.lesson_id) > 2
 ORDER BY lessons_taught DESC;
 
 --All Students Enrolled in Diploma in Software Engineering
@@ -1059,26 +1129,34 @@ INNER JOIN courses c ON ce.course_id = c.course_id
 WHERE c.course_name = 'Diploma in Software Engineering ';
 
 --All Assignments Due in Next 7 Days
+INSERT INTO assignment (assignment_title, assignment_fiies, lesson_id, end_date)
+VALUES ('Database Management System Assignment', 'dbms_assignment.docx', 3, TO_DATE('2024-10-21', 'YYYY-MM-DD'));
+SELECT * from assignment_students;
+SELECT * from assignment;
+  
 SELECT a.assignment_title, a.end_date, c.course_name, l.lesson_name
 FROM assignment a INNER JOIN lessons l ON a.lesson_id = l.lesson_id
 INNER JOIN courses c ON l.course_id = c.course_id
 WHERE a.end_date BETWEEN SYSDATE AND SYSDATE + 7
 ORDER BY a.end_date;
 
---Average Salary of Lecturers in Each Department
-SELECT d.department_name, AVG(l.salary) AS average_salary
-FROM departments d INNER JOIN lecturers l ON d.department_id = l.department_id
-GROUP BY d.department_name;
+--Average, Maximum, and Minimum Salaries by Department
+SELECT 
+    d.department_name, 
+    AVG(l.salary) AS average_salary,
+    MAX(l.salary) AS max_salary,
+    MIN(l.salary) AS min_salary
+FROM departments d INNER JOIN lecturers l 
+ON d.department_id = l.department_id GROUP BY d.department_name;
 
---Number of enrollments
+--Number of student enrollments
 SELECT c.course_name, COUNT(ce.student_id) AS number_of_enrollments
 FROM courses c INNER JOIN course_enrollments ce ON c.course_id = ce.course_id
 GROUP BY c.course_name ORDER BY number_of_enrollments DESC;
 
---Active  Lecturers with Active Courses
-SELECT l.lecturer_id, l.first_name, l.last_name, c.course_name, c.status FROM lecturers l
-INNER JOIN courses c ON l.lecturer_id = c.created_by
-WHERE l.status = 'Active' AND c.status = 'Active';
+--Update Course Enrollment for Students
+UPDATE course_enrollments SET course_id = 5 WHERE 
+student_id IN (SELECT student_id FROM course_enrollments WHERE course_id = 6); 
 
 --Courses Without any enrollments
 SELECT c.* FROM courses c
@@ -1097,6 +1175,81 @@ GROUP BY s.student_id, s.first_name, s.last_name
 HAVING COUNT(ce.course_id) > 1
 ORDER BY courses_enrolled DESC;
 
+--Fetch Unsubmitted Assignments for Specific Student ID
+SELECT a.student_id,a.status,ast.assignment_title,ast.assignment_fiies,ast.post_date,ast.end_date 
+FROM ADMIN.assignment_students a JOIN ADMIN.assignment ast on a.assignment_id = ast.assignment_id
+WHERE status = 'Not submitted' AND student_id = 1 ;
+
+--Fetch Students Based on Name, Email, and Phone Criteria
+SELECT * FROM students WHERE 
+    (first_name LIKE 'A%' OR last_name LIKE '%ndo')
+    AND email LIKE '%@gmail.com'
+    AND phone_number LIKE '07_%'
+ORDER BY last_name, first_name;
+
+--View for Upcoming Assignments
+CREATE OR REPLACE VIEW upcoming_assignments AS
+SELECT a.assignment_id, a.assignment_title, a.end_date, l.lesson_name, l.taught_by
+FROM assignment a JOIN lessons l ON a.lesson_id = l.lesson_id
+WHERE a.end_date > CURRENT_TIMESTAMP;
+
+--Retrieve Upcoming Assignments from View
+SELECT * FROM upcoming_assignments;
+
+--Create View for Department Course and Lesson
+CREATE OR REPLACE VIEW department_course_lesson_stats AS SELECT 
+    d.department_id,
+    d.department_name,
+    COUNT(DISTINCT c.course_id) AS total_courses,
+    COUNT(DISTINCT CASE WHEN c.status = 'Active' THEN c.course_id END) AS active_courses,
+    COUNT(DISTINCT CASE WHEN c.status = 'Inactive' THEN c.course_id END) AS inactive_courses,
+    COUNT(DISTINCT l.lesson_id) AS total_lessons,
+    COUNT(DISTINCT CASE WHEN l.status = 'Active' THEN l.lesson_id END) AS active_lessons,
+    COUNT(DISTINCT CASE WHEN l.status = 'Inactive' THEN l.lesson_id END) AS inactive_lessons
+FROM departments d LEFT JOIN courses c ON d.department_id = c.department_id
+LEFT JOIN lessons l ON c.course_id = l.course_id
+GROUP BY d.department_id, d.department_name;
+
+--Retrieve  department course lesson  from View
+SELECT * FROM department_course_lesson_stats;
+
+--Combine Department and Course Information Using UNION
+SELECT department_id AS id,department_name AS name,created_at AS created_date,
+    NULL AS course_name,NULL AS status
+FROM departments
+UNION ALL
+SELECT department_id AS id,NULL AS name,NULL AS created_date,
+    course_name AS course_name,status
+FROM courses;
+
+--Create Function to Count Scheduled Lectures by lesson_id
+CREATE OR REPLACE FUNCTION get_scheduled_lectures(p_lesson_id NUMBER) RETURN NUMBER 
+IS v_count NUMBER;
+BEGIN
+    SELECT COUNT(*) INTO v_count FROM schedule 
+    WHERE lesson_id = p_lesson_id;
+    RETURN v_count;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN RETURN 0;
+    WHEN OTHERS THEN RETURN NULL;
+END;
+/
+
+SET SERVEROUTPUT ON;
+DECLARE
+    v_lecture_count NUMBER;
+    v_lesson_id NUMBER;
+BEGIN
+    v_lesson_id := &lesson_id;
+    v_lecture_count := get_scheduled_lectures(v_lesson_id);
+    DBMS_OUTPUT.PUT_LINE('Number of scheduled lectures for lesson ID ' || v_lesson_id || ': ' || v_lecture_count);
+END;
+/
+
+
+
+
+
 
 SELECT * FROM departments;
 SELECT * FROM lecturers;
@@ -1106,6 +1259,7 @@ SELECT * FROM students;
 SELECT * FROM assignment;
 SELECT * FROM assignment_students;
 SELECT * FROM students_feedback;
+SELECT * FROM schedule;
 
 
 
