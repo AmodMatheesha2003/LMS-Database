@@ -1246,12 +1246,131 @@ BEGIN
 END;
 /
 
+--Get Assignment Deadline for a Student
+CREATE OR REPLACE FUNCTION get_assignment_deadline (p_student_id NUMBER, p_assignment_id NUMBER) 
+RETURN DATE IS v_end_date DATE;
+BEGIN
+    SELECT a.end_date INTO v_end_date FROM assignment a
+    JOIN assignment_students ast ON a.assignment_id = ast.assignment_id
+    WHERE ast.student_id = p_student_id AND a.assignment_id = p_assignment_id;
+    RETURN v_end_date;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        RETURN NULL;
+END;
+/
 
+--Display Assignment Deadline for a Student
+SET SERVEROUTPUT ON;
+DECLARE
+    v_deadline DATE;
+BEGIN
+    v_deadline := get_assignment_deadline(1, 1); --student_id and assignment_id 
+    DBMS_OUTPUT.PUT_LINE('Assignment Deadline: ' || v_deadline);
+END;
+/
 
+--Average Rating for a Lesson
+CREATE OR REPLACE FUNCTION get_average_rating ( p_lesson_id NUMBER) 
+RETURN NUMBER IS v_avg_rating NUMBER;
+BEGIN
+    SELECT AVG(f.rating) INTO v_avg_rating FROM students_feedback f
+    WHERE f.lesson_id = p_lesson_id;
+    RETURN v_avg_rating;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        RETURN 0;
+END;
+/
 
+-- Retrieve average rating for a lesson
+SET SERVEROUTPUT ON;
+DECLARE
+    v_avg_rating NUMBER;
+BEGIN
+    v_avg_rating := get_average_rating(1);  --lesson ID
+    DBMS_OUTPUT.PUT_LINE('Average Rating: ' || v_avg_rating);
+END;
+/
 
+--Calculate GPA for a Student
+CREATE OR REPLACE FUNCTION calculate_gpa (p_student_id NUMBER) 
+RETURN NUMBER IS
+    v_total_points NUMBER := 0;
+    v_total_assignments NUMBER := 0;
+    v_grade_point NUMBER;
+BEGIN
+    FOR rec IN (SELECT grade FROM assignment_students WHERE student_id = p_student_id
+    AND grade IS NOT NULL) LOOP
+        CASE rec.grade
+            WHEN 'A+' THEN v_grade_point := 4.0; 
+            WHEN 'A'  THEN v_grade_point := 4.0; 
+            WHEN 'A-' THEN v_grade_point := 3.7; 
+            WHEN 'B+' THEN v_grade_point := 3.3; 
+            WHEN 'B'  THEN v_grade_point := 3.0; 
+            WHEN 'B-' THEN v_grade_point := 2.7; 
+            WHEN 'C+' THEN v_grade_point := 2.3; 
+            WHEN 'C'  THEN v_grade_point := 2.0; 
+            WHEN 'C-' THEN v_grade_point := 1.7; 
+            WHEN 'D+' THEN v_grade_point := 1.3; 
+            WHEN 'D'  THEN v_grade_point := 1.0; 
+            ELSE v_grade_point := 0;
+        END CASE;
+        v_total_points := v_total_points + v_grade_point;
+        v_total_assignments := v_total_assignments + 1;
+    END LOOP;
+    IF v_total_assignments = 0 THEN
+        RETURN 0;
+    ELSE
+        RETURN v_total_points / v_total_assignments;
+    END IF;
+END;
+/
+
+-- Retrieve GPA for a student
+SET SERVEROUTPUT ON;
+DECLARE
+    v_gpa NUMBER;
+BEGIN
+    v_gpa := calculate_gpa(1);  --student ID
+    DBMS_OUTPUT.PUT_LINE('Student GPA: ' || v_gpa);
+END;
+/
+
+CREATE OR REPLACE VIEW lecturers_with_departments AS
+SELECT 
+    l.lecturer_id,
+    l.first_name,
+    l.last_name,
+    l.email,
+    l.phone_number,
+    d.department_name
+FROM 
+    lecturers l
+JOIN 
+    departments d ON l.department_id = d.department_id;
+    
+SELECT * FROM lecturers_with_departments;
+
+CREATE OR REPLACE VIEW student_feedback_for_lessons AS
+SELECT 
+    sf.lesson_id AS feedback_lesson_id, 
+    sf.student_id AS feedback_student_id,
+    sf.comments,
+    sf.rating,
+    sf.post_date
+FROM 
+    students_feedback sf
+JOIN 
+    lessons les ON sf.lesson_id = les.lesson_id;
+
+--view
+SELECT * FROM student_feedback_for_lessons;
+SELECT * FROM upcoming_assignments ;
+SELECT * FROM department_course_lesson_stats ;
 
 SELECT * FROM departments;
+SELECT * FROM lessons;
 SELECT * FROM lecturers;
 SELECT * FROM courses;
 SELECT * FROM course_enrollments;
@@ -1260,8 +1379,6 @@ SELECT * FROM assignment;
 SELECT * FROM assignment_students;
 SELECT * FROM students_feedback;
 SELECT * FROM schedule;
-
-
 
 
 
